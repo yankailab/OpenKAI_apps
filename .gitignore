@@ -1,0 +1,13 @@
+/data/output/*.*log
+/Debug/
+/Release/
+/build/
+*.prefs
+.project
+.cproject
+*.*~
+/.kdev4/
+null.d
+!.gitignore
+*.log
+

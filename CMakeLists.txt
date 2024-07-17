@@ -6,7 +6,11 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 OPTION(USE_GLOG "Use glog" ON)
 OPTION(USE_ROS "Use ROS2 interface" OFF)
+OPTION(USE_OPEN3D "Use Open3D" OFF)
 OPTION(USE_OPENCV "Use OpenCV" OFF)
+
+OPTION(WITH_HELLO_AP "Build helloAP" OFF)
+OPTION(WITH_FASTLIO_SCAN "Build fastLioScan" OFF)
 
 find_package(Eigen3 3.1.0 REQUIRED)
 
@@ -20,15 +24,17 @@ set(OKapps_libDir /usr/lib /usr/local/lib)
 set(OKapps_include /usr/local/include /usr/include ${EIGEN3_INCLUDE_DIR})
 set(OKapps_lib OpenKAI pthread boost_system uuid ncurses ssl ${EIGEN3_LIBS})
 
-#file(GLOB_RECURSE OKapps_cpp src/*.cpp src/*.cc src/*.c)
-file(GLOB_RECURSE OKapps_AP_cpp src/HelloArduPilot/*.cpp src/HelloArduPilot/*.cc src/HelloArduPilot/*.c)
-
-set(OKapps_cpp ${OKapps_cpp} ${OKapps_AP_cpp})
-
 # Optional modules
 if(USE_GLOG)
   add_definitions(-DUSE_GLOG)
   set(OKapps_lib ${OKapps_lib} glog)
+endif()
+
+if(USE_OPEN3D)
+  add_definitions(-DUSE_OPEN3D)
+  set(Open3D_jsoncpp "/usr/include/jsoncpp" CACHE STRING "")
+  set(OKapps_include ${OKapps_include} ${Open3D_jsoncpp})
+  set(OKapps_lib ${OKapps_lib} Open3D)
 endif()
 
 if(USE_OPENCV)
@@ -48,7 +54,28 @@ endif()
 # Setting specific lib here
 link_directories(${OKapps_libDir})
 
-# packages
+# Definitions
+add_definitions(${OKapps_definitions})
+
+# C/C++ settings
+include_directories(${OKapps_include})
+
+# common
+#file(GLOB_RECURSE OKapps_cpp src/*.cpp src/*.cc src/*.c)
+
+# apps
+if(WITH_HELLO_AP)
+file(GLOB_RECURSE OKapps_cpp_helloAP src/helloAP/*.cpp)
+add_executable(helloAP ${OKapps_cpp} ${OKapps_cpp_helloAP})
+target_link_libraries(helloAP ${OKapps_lib})
+endif()
+
+if(WITH_FASTLIO_SCAN)
+file(GLOB_RECURSE OKapps_cpp_fastLioScan src/fastLioScan/*.cpp)
+add_executable(fastLioScan ${OKapps_cpp} ${OKapps_cpp_fastLioScan})
+target_link_libraries(fastLioScan ${OKapps_lib})
+endif()
+
 if(USE_ROS)
   find_package(ament_cmake REQUIRED)
   find_package(rclcpp REQUIRED)
@@ -56,19 +83,10 @@ if(USE_ROS)
   find_package(sensor_msgs REQUIRED)
   find_package(nav_msgs REQUIRED)
 
-  ament_target_dependencies(OKapps rclcpp std_msgs sensor_msgs nav_msgs)
+  ament_target_dependencies(fastLioScan rclcpp std_msgs sensor_msgs nav_msgs)
   ament_package()
 endif()
 
-# Definitions
-add_definitions(${OKapps_definitions})
-
-add_executable(OKapps ${OKapps_cpp})
-
-# C/C++ settings
-include_directories(${OKapps_include})
-target_link_libraries(OKapps ${OKapps_lib})
 
 include(GNUInstallDirs)
-set_target_properties(OKapps PROPERTIES
-    VERSION ${PROJECT_VERSION})
+#set_target_properties(OKapps PROPERTIES VERSION ${PROJECT_VERSION})

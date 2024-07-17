@@ -20,14 +20,14 @@ int main(int argc, char* argv[])
 {
 	if(argc < 2)
 	{
-		printf("Usage: ./HelloArduPilot [kiss file]\n");
+		printf("Usage: ./helloAP [kiss file]\n");
 		return 0;
 	}
 
 	string argStr(argv[1]);
 	if(argStr == "-h" || argStr == "--help")
 	{
-		printf("Usage: ./HelloArduPilot [kiss file]\n");
+		printf("Usage: ./helloAP [kiss file]\n");
 		return 0;
 	}
 

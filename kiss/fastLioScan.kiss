@@ -1,0 +1,171 @@
+{
+	"name":"APP",
+	"class":"Startup",
+	"appName":"PCscan",
+	"bLog":1,
+	"bStdErr":1,
+}
+
+{
+	"name":"console",
+	"class":"_Console",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"vBASE":["fastLio","cam","RGBview"],
+}
+
+{
+	"name":"RGBview",
+	"class":"_WindowCV",
+	"bON":1,
+	"bFullScreen":0,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"vBASE":["cam"],
+}
+
+{
+	"name":"cam",
+	"class":"_GStreamer",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"pipeline":"v4l2src device=/dev/video0 ! videoflip method=0 ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! appsink",
+}
+
+{
+	"name":"fastLio",
+	"class":"_ROS_fastLio",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+    {
+		"name":"threadROS",
+		"FPS":1,
+	}
+    {
+		"name":"node",
+		"/topicPC2":"Laser_map",
+		"topicOdom":"Odometry",
+		"/topicPath":"path",
+	}
+
+	"/_PCframe":"pcFrame",
+	"scale":1.0,
+	"vAxisIdx":[0,1,2],
+}
+
+{
+	"name":"ws",
+	"class":"_WebSocket",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":10,
+	}
+    {
+		"name":"threadR",
+		"FPS":10,
+	}
+}
+
+{
+	"name":"fastLioScan",
+	"class":"_fastLioScan",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+    {
+		"name":"threadR",
+		"FPS":10,
+	}
+	"bLog":1,
+
+	"_IObase":"ws",
+	"msgFinishSend":"",
+	"msgFinishRecv":"EOJ",
+	"ieSendHB":500000,
+
+	"cmdROStrigger":"ros2 service call /map_save std_srvs/srv/Trigger {}",
+	"/cmdOnSaved":"",
+
+	"tInt":0.5,
+	"dir":"/home/kai/Downloads/fastLioScanTest/",
+	"subDir":"",
+	"_VisionBase":"cam",
+	"_PCframe":"pcFrame",
+	"_NavBase":"fastLio",
+}
+
+
+{
+	"name":"gv",
+	"class":"_GeometryViewer",
+	"bON":0,
+    {
+		"name":"thread",
+		"FPS":10,
+	}
+    {
+		"name":"threadUI",
+		"FPS":30,
+	}
+	"vWinSize":[1920,1080],
+	"pathRes":"/usr/local/bin/Open3D/resources",
+	"device":"CPU:0",
+	"vCamLookAt":[0,0,0],
+	"vCamEye":[0,2,0],
+	"vCamUp":[0,0,1],
+	"vCamAutoLookAt":[0,0,0],
+	"vCamAutoEye":[0,2,0],
+	"vCamAutoUp":[0,0,1],
+	"vCoR":[0,0,0],
+	"camFov":75,
+	"vCamNF":[0, 500],
+	"camFovType":1,
+	"bFullScreen":0,
+	"wPanel":20,
+	"vBtnPadding":[1.6, 2.0],
+	"mouseMode":0,
+	"vDmove":[0.5, 5.0],
+	"dHiddenRemove":100.0,
+	"dirSave":"/home/kai/Documents/",
+	"/dirSave":"/media/lab/",
+	"rVoxel":0.05,
+
+	{
+		"name":"geometry",
+		{
+			"_GeometryBase":"pcFrame",
+			"bStatic":0,
+			"nP":50000,
+			"rDummyDome":1000.0,
+			"matName":"defaultUnlit",
+			"matPointSize":1,
+		}
+	}
+}
+
+{
+	"name":"pcFrame",
+	"class":"_PCframe",
+	"bON":0,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"bLog":0,
+	"nP":50000,
+	"bColOverwrite":0,
+}

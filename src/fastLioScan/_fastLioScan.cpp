@@ -13,7 +13,6 @@ namespace kai
 	_fastLioScan::_fastLioScan()
 	{
 		m_pV = nullptr;
-		m_pPC = nullptr;
 		m_pNav = nullptr;
 		m_cmdROStrigger = "";
 		m_cmdOnSaved = "";
@@ -73,11 +72,6 @@ namespace kai
 		m_pV = (_VisionBase *)(pK->findModule(n));
 		IF_Fl(!m_pV, n + ": not found");
 
-		// n = "";
-		// pK->v("_PCframe", &n);
-		// m_pPC = (_PCframe *)(pK->findModule(n));
-		// IF_Fl(!m_pPC, n + ": not found");
-
 		n = "";
 		pK->v("_NavBase", &n);
 		m_pNav = (_NavBase *)(pK->findModule(n));
@@ -100,10 +94,8 @@ namespace kai
 	int _fastLioScan::check(void)
 	{
 		NULL__(m_pV, -1);
-//		NULL__(m_pPC, -1);
 		NULL__(m_pNav, -1);
 
-		//		return this->_JSONbase::check();
 		return 0;
 	}
 
@@ -194,14 +186,8 @@ namespace kai
 			system(m_cmdROStrigger.c_str());
 
 		string k = picojson::value(m_jArray).serialize();
-
 		string fName = m_subDir + "config.json";
-		_File *pFile = new _File();
-		IF_(!pFile->open(fName, ios::out));
-
-		pFile->write((uint8_t *)k.c_str(), k.length());
-		pFile->close();
-		delete pFile;
+		writeFile(fName, k);
 
 		if (!m_cmdOnSaved.empty())
 			system(m_cmdOnSaved.c_str());

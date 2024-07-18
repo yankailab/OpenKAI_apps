@@ -10,9 +10,9 @@
 
 #include <OpenKAI/Protocol/_JSONbase.h>
 #include <OpenKAI/Vision/_VisionBase.h>
-#include <OpenKAI/3D/PointCloud/_PCframe.h>
 #include <OpenKAI/Navigation/_NavBase.h>
 #include <OpenKAI/Utility/utilEvent.h>
+#include <OpenKAI/Utility/utilFile.h>
 
 using namespace open3d;
 using namespace open3d::geometry;
@@ -38,6 +38,7 @@ namespace kai
 		void scanSave(void);
 		void scanClear(void);
 
+
 	private:
 		void updateScan(void);
 		void update(void);
@@ -57,7 +58,6 @@ namespace kai
 
 	protected:
 		_VisionBase* m_pV;
-		_PCframe* m_pPC;
 		_NavBase* m_pNav;
 
 		int m_iTake;

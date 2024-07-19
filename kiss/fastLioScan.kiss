@@ -14,7 +14,7 @@
 		"name":"thread",
 		"FPS":30,
 	}
-	"vBASE":["fastLio","cam","RGBview"],
+	"vBASE":["fastLio","cam","RGBview","fastLioScan","fastLioScanRGB"],
 }
 
 {
@@ -38,6 +38,20 @@
 		"FPS":30,
 	}
 	"pipeline":"v4l2src device=/dev/video0 ! videoflip method=0 ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! appsink",
+	"/pipeline":"v4l2src device=/dev/video5 ! videoflip method=0 ! video/x-raw,width=1920,height=1080,framerate=30/1 ! videoconvert ! appsink",
+}
+
+{
+	"name":"cam",
+	"class":"_Camera",
+	"bON":0,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"deviceID":0,
+	"/vSizeRGB":[640,480],
+	"vSizeRGB":[1280,720],
 }
 
 {
@@ -90,24 +104,53 @@
 		"name":"threadR",
 		"FPS":10,
 	}
-	"bLog":1,
-
+	"bLog":0,
 	"_IObase":"ws",
 	"msgFinishSend":"",
 	"msgFinishRecv":"EOJ",
 	"ieSendHB":500000,
 
-	"cmdROStrigger":"ros2 service call /map_save std_srvs/srv/Trigger {}",
-	"/cmdOnSaved":"",
+	"/cmdROStrigger":"ros2 service call /map_save std_srvs/srv/Trigger {}",
+	"cmdOnSaved":"cp /home/kai/Documents/scan.pcd [dirProj]",
 
 	"tInt":0.5,
 	"dir":"/home/kai/Downloads/fastLioScanTest/",
-	"subDir":"",
 	"_VisionBase":"cam",
-	"_PCframe":"pcFrame",
 	"_NavBase":"fastLio",
+	"_fastLioScanRGB":"fastLioScanRGB",
 }
 
+{
+	"name":"fastLioScanRGB",
+	"class":"_fastLioScanRGB",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+    {
+		"name":"threadR",
+		"FPS":10,
+	}
+	"bLog":1,
+	"_PCframe":"pcFrame",
+	"/fModel":"/home/kai/Downloads/fastLioScanTest/",
+	"fCamConfig":"/home/kai/Downloads/fastLioScanTest/camInt.json",
+	"fCamTraj":"/home/kai/Downloads/fastLioScanTest/2024-07-19_13-58-28/traj.json",
+}
+
+{
+	"name":"pcFrame",
+	"class":"_PCframe",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"bLog":0,
+	"nP":50000,
+	"bColOverwrite":0,
+}
 
 {
 	"name":"gv",
@@ -155,17 +198,4 @@
 			"matPointSize":1,
 		}
 	}
-}
-
-{
-	"name":"pcFrame",
-	"class":"_PCframe",
-	"bON":0,
-    {
-		"name":"thread",
-		"FPS":30,
-	}
-	"bLog":0,
-	"nP":50000,
-	"bColOverwrite":0,
 }

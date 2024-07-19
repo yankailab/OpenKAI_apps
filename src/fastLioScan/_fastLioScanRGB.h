@@ -27,12 +27,14 @@ namespace kai
 		double m_Gamma = 0;
 		double m_Cx = 0.5;
 		double m_Cy = 0.5;
+		vDouble3 m_vCSoffset = {0,0,0};
 	};
 
 	struct FASTLIO_SCAN_FRAME
 	{
 		Mat m_mRGB;
-		Matrix4d m_mT;
+		vFloat4 m_vQ = {0,0,0,0};
+		vFloat3 m_vT = {0,0,0};
 	};
 
 	class _fastLioScanRGB : public _ModuleBase
@@ -47,18 +49,22 @@ namespace kai
 		int check(void);
 		void console(void *pConsole);
 
-		bool openModel(const string& fModel);
+		bool openModel(string fModel = "");
 		void updateModel(void);
-		bool saveModel(const string& fModel);
+		bool saveModel(string fModel = "");
 		void clearModel(void);
 
-		bool loadCamConfig(const string& fConfig);
+		bool loadCamConfig(string fConfig = "");
 		void updateCamConfig(const FASTLIO_SCAN_CAM_INTRINSIC& c);
-		bool saveCamConfig(const string& fConfig);
+		bool saveCamConfig(string fConfig = "");
 
-		bool loadCamTraj(const string& fTraj);
+		bool loadCamTraj(string fTraj = "");
+
+		void setCamIntrinsic(FASTLIO_SCAN_CAM_INTRINSIC& ci);
+		FASTLIO_SCAN_CAM_INTRINSIC getCamIntrinsic(void);
 
 	private:
+		void updateFrame(const PointCloud& pcRaw, PointCloud* pPC, const FASTLIO_SCAN_FRAME& f);
 		void update(void);
 		static void *getUpdate(void *This)
 		{
@@ -72,15 +78,13 @@ namespace kai
 		string m_fCamTraj;
 
 		PointCloud m_pcModel;
+		PointCloud m_pcModelRGB;
 		_PCframe* m_pPC;
 
 		FASTLIO_SCAN_CAM_INTRINSIC m_camIntrinsic;
 		Matrix4d m_mCamInt;
 		Matrix4d m_mCSoffset;	// cam sensor offset
-		Matrix4d m_mW2C;
-		Matrix4d m_mW2S;
 
-		picojson::array m_jArray;
 		vector<FASTLIO_SCAN_FRAME> m_vFrame;
 
 	};

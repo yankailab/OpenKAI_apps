@@ -14,11 +14,14 @@ namespace kai
 	{
 		m_pV = nullptr;
 		m_pNav = nullptr;
+		m_pFLSrgb = nullptr;
+
 		m_cmdROStrigger = "";
 		m_cmdOnSaved = "";
 
+		m_bScanning = false;
 		m_dir = "/home/";
-		m_subDir = "";
+		m_projDir = "";
 		m_bFlipRGB = false;
 		m_quality = 100;
 
@@ -42,16 +45,6 @@ namespace kai
 		m_ieShutter.init(tInt * (float)USEC_1SEC);
 
 		pK->v("dir", &m_dir);
-		pK->v("subDir", &m_subDir);
-		if (m_subDir.empty())
-			m_subDir = m_dir + tFormat() + "/";
-		else
-			m_subDir = m_dir + m_subDir;
-
-		string cmd;
-		cmd = "mkdir " + m_subDir;
-		system(cmd.c_str());
-
 		pK->v("bFlipRGB", &m_bFlipRGB);
 		pK->v("quality", &m_quality);
 		m_compress.push_back(IMWRITE_JPEG_QUALITY);
@@ -77,6 +70,11 @@ namespace kai
 		m_pNav = (_NavBase *)(pK->findModule(n));
 		IF_Fl(!m_pNav, n + ": not found");
 
+		n = "";
+		pK->v("_fastLioScanRGB", &n);
+		m_pFLSrgb = (_fastLioScanRGB *)(pK->findModule(n));
+		IF_Fl(!m_pFLSrgb, n + ": not found");
+
 		return true;
 	}
 
@@ -95,8 +93,9 @@ namespace kai
 	{
 		NULL__(m_pV, -1);
 		NULL__(m_pNav, -1);
+		NULL__(m_pFLSrgb, -1);
 
-		return 0;
+		return this->_JSONbase::check();
 	}
 
 	void _fastLioScan::update(void)
@@ -121,18 +120,23 @@ namespace kai
 		{
 			scanShutter();
 		}
+	}
 
-		if (m_iTake > 10)
-		{
-			scanSave();
-			scanClear();
-			exit(0);
-		}
+	void _fastLioScan::scanStart(void)
+	{
+		m_projDir = m_dir + tFormat() + "/";
+		string cmd;
+		cmd = "mkdir " + m_projDir;
+		system(cmd.c_str());
+
+		scanClear();
+		m_bScanning = true;
 	}
 
 	void _fastLioScan::scanShutter(void)
 	{
 		IF_(check() < 0);
+		IF_(!m_bScanning);
 
 		string fName;
 		Frame fBGR = *m_pV->getFrameRGB();
@@ -142,42 +146,39 @@ namespace kai
 		fBGR.m()->copyTo(mBGR);
 		IF_(mBGR.empty());
 
-		Matrix4f mT = m_pNav->mT();
+		vFloat4 vQ = m_pNav->q();
+		vFloat3 vT = m_pNav->t();
 
-		fName = m_subDir + i2str(m_iTake) + ".jpg";
+		fName = m_projDir + i2str(m_iTake) + ".jpg";
 		cv::imwrite(fName, mBGR, m_compress);
 		// cmd = "exiftool -overwrite_original -GPSLongitude=\"" + lon + "\" -GPSLatitude=\"" + lat + "\" " + fName;
 		// system(cmd.c_str());
 
 		picojson::object o;
-		o.insert(make_pair("fName", fName));
+		o.insert(make_pair("fImg", fName));
 
-		picojson::array vT;
-		vT.push_back(value(mT(0, 0)));
-		vT.push_back(value(mT(0, 1)));
-		vT.push_back(value(mT(0, 2)));
-		vT.push_back(value(mT(0, 3)));
+		picojson::array jQ;
+		jQ.push_back(value(vQ.x));
+		jQ.push_back(value(vQ.y));
+		jQ.push_back(value(vQ.z));
+		jQ.push_back(value(vQ.w));
+		o.insert(make_pair("vQ", jQ));
 
-		vT.push_back(value(mT(1, 0)));
-		vT.push_back(value(mT(1, 1)));
-		vT.push_back(value(mT(1, 2)));
-		vT.push_back(value(mT(1, 3)));
+		picojson::array jT;
+		jT.push_back(value(vT.x));
+		jT.push_back(value(vT.y));
+		jT.push_back(value(vT.z));
+		o.insert(make_pair("vT", jT));
 
-		vT.push_back(value(mT(2, 0)));
-		vT.push_back(value(mT(2, 1)));
-		vT.push_back(value(mT(2, 2)));
-		vT.push_back(value(mT(2, 3)));
-
-		vT.push_back(value(mT(3, 0)));
-		vT.push_back(value(mT(3, 1)));
-		vT.push_back(value(mT(3, 2)));
-		vT.push_back(value(mT(3, 3)));
-
-		o.insert(make_pair("mT", value(vT)));
-		m_jArray.push_back(value(o));
+		m_jArrCamTraj.push_back(value(o));
 
 		LOG_I("Take: " + i2str(m_iTake));
 		m_iTake++;
+	}
+
+	void _fastLioScan::scanStop(void)
+	{
+		m_bScanning = false;
 	}
 
 	void _fastLioScan::scanSave(void)
@@ -185,19 +186,27 @@ namespace kai
 		if (!m_cmdROStrigger.empty())
 			system(m_cmdROStrigger.c_str());
 
-		string k = picojson::value(m_jArray).serialize();
-		string fName = m_subDir + "config.json";
+		picojson::object o;
+		o.insert(make_pair("imgTraj", m_jArrCamTraj));
+
+		string k = picojson::value(o).serialize();
+		string fName = m_projDir + "traj.json";
 		writeFile(fName, k);
+		m_pFLSrgb->loadCamTraj(fName);
 
 		if (!m_cmdOnSaved.empty())
-			system(m_cmdOnSaved.c_str());
+		{
+			string cmd = replace(m_cmdOnSaved, "[dirProj]", m_projDir);
+			system(cmd.c_str());
+		}
+
+		m_pFLSrgb->openModel(m_projDir+"scan.pcd");
 	}
 
 	void _fastLioScan::scanClear(void)
 	{
 		m_iTake = 0;
-		m_jo.clear();
-		m_jArray.clear();
+		m_jArrCamTraj.clear();
 	}
 
 	void _fastLioScan::updateR(void)
@@ -225,10 +234,107 @@ namespace kai
 		IF_(!jo["cmd"].is<string>());
 		string cmd = jo["cmd"].get<string>();
 
-		// if (cmd == "updateGrid")
-		// 	updateGrid(jo);
-		// else if (cmd == "setGrid")
-		// 	setGrid(jo);
+		if (cmd == "scanStart")
+			scanStart(jo);
+		else if (cmd == "scanStop")
+			scanStop(jo);
+		else if (cmd == "exportModel")
+			exportModel(jo);
+		else if (cmd == "setCamConfig")
+			setParam(jo);
+		else if (cmd == "saveCamConfig")
+			saveParam(jo);
+		else if (cmd == "getCamConfig")
+			getParam(jo);
+		else if (cmd == "getCamConfigSaved")
+			getParamSaved(jo);
+	}
+
+	void _fastLioScan::scanStart(picojson::object &jo)
+	{
+		scanStart();
+	}
+
+	void _fastLioScan::scanStop(picojson::object &jo)
+	{
+		scanStop();
+		scanSave();
+	}
+
+	void _fastLioScan::exportModel(picojson::object &jo)
+	{
+		m_pFLSrgb->saveModel(m_projDir + "scanColor.pcd");
+	}
+
+	void _fastLioScan::setParam(picojson::object &jo)
+	{
+		IF_(check() < 0);
+
+		FASTLIO_SCAN_CAM_INTRINSIC ci;
+
+		IF_(!jo["Fx"].is<double>());
+		ci.m_Fx = jo["Fx"].get<double>();
+		IF_(!jo["Fy"].is<double>());
+		ci.m_Fy = jo["Fy"].get<double>();
+		IF_(!jo["Gamma"].is<double>());
+		ci.m_Gamma = jo["Gamma"].get<double>();
+		IF_(!jo["Cx"].is<double>());
+		ci.m_Cx = jo["Cx"].get<double>();
+		IF_(!jo["Cy"].is<double>());
+		ci.m_Cy = jo["Cy"].get<double>();
+
+		IF_(!jo["OfsX"].is<double>());
+		ci.m_vCSoffset.x = jo["OfsX"].get<double>();
+		IF_(!jo["OfsY"].is<double>());
+		ci.m_vCSoffset.y = jo["OfsY"].get<double>();
+		IF_(!jo["OfsZ"].is<double>());
+		ci.m_vCSoffset.z = jo["OfsZ"].get<double>();
+
+		// IF_(!jo["vCSoffset"].is<value::array>());
+		// value::array vCS = jo["vCSoffset"].get<value::array>();
+		// ci.m_vCSoffset.x = vCS[0].get<double>();
+		// ci.m_vCSoffset.y = vCS[1].get<double>();
+		// ci.m_vCSoffset.z = vCS[2].get<double>();
+
+		m_pFLSrgb->setCamIntrinsic(ci);
+	}
+
+	void _fastLioScan::saveParam(picojson::object &jo)
+	{
+		IF_(check() < 0);
+
+		m_pFLSrgb->saveCamConfig();
+
+		return;
+	}
+
+	void _fastLioScan::getParam(picojson::object &jo)
+	{
+		IF_(check() < 0);
+
+		FASTLIO_SCAN_CAM_INTRINSIC ci;
+		ci = m_pFLSrgb->getCamIntrinsic();
+
+		object r;
+		JO(r, "cmd", "getParam");
+		JO(r, "Fx", ci.m_Fx);
+		JO(r, "Fy", ci.m_Fy);
+		JO(r, "Gamma", ci.m_Gamma);
+		JO(r, "Cx", ci.m_Cx);
+		JO(r, "Cy", ci.m_Cy);
+		JO(r, "OfsX", ci.m_vCSoffset.x);
+		JO(r, "OfsY", ci.m_vCSoffset.y);
+		JO(r, "OfsZ", ci.m_vCSoffset.z);
+
+		sendMsg(r);
+	}
+
+	void _fastLioScan::getParamSaved(picojson::object &jo)
+	{
+		IF_(check() < 0);
+
+		m_pFLSrgb->loadCamConfig();
+		getParam(jo);
 	}
 
 	void _fastLioScan::console(void *pConsole)
@@ -238,7 +344,7 @@ namespace kai
 		IF_(check() < 0);
 
 		_Console *pC = (_Console *)pConsole;
-		//		pC->addMsg("Uploading: " + m_fName);
+		pC->addMsg("iTake: " + i2str(m_iTake));
 	}
 
 }

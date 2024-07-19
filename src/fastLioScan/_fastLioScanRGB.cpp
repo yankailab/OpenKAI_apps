@@ -73,20 +73,18 @@ namespace kai
 		{
 			m_pT->autoFPSfrom();
 
-			updateModel();
+			//			updateModel();
 
 			m_pT->autoFPSto();
 		}
 	}
 
-	void _fastLioScanRGB::updateModel(void)
+	bool _fastLioScanRGB::openModel(string fModel)
 	{
-		IF_(check() < 0);
-	}
+		IF_F(check() < 0);
 
-	bool _fastLioScanRGB::openModel(const string &fModel)
-	{
-		IF_F(fModel.empty());
+		if (fModel.empty())
+			fModel = m_fModel;
 
 		clearModel();
 
@@ -94,16 +92,87 @@ namespace kai
 		IF_F(!io::ReadPointCloud(fModel, m_pcModel));
 		LOG_I("Read point cloud: " + i2str(m_pcModel.points_.size()));
 
+		updateModel();
+
+		return true;
+	}
+
+	void _fastLioScanRGB::updateModel(void)
+	{
+		IF_(check() < 0);
+
+		// update camera intrinsic matrices
+
+		// merge colors with point cloud using current camera config
+		m_pcModelRGB.Clear();
+		for (FASTLIO_SCAN_FRAME f : m_vFrame)
+		{
+			updateFrame(m_pcModel, &m_pcModelRGB, f);
+		}
+
+		*m_pPC->getNextBuffer() = m_pcModelRGB;
+		m_pPC->swapBuffer();
+	}
+
+	void _fastLioScanRGB::updateFrame(const PointCloud& pcRaw, PointCloud *pPC, const FASTLIO_SCAN_FRAME &f)
+	{
+		NULL_(pPC);
+
+		// camera translation and rotation matrices for the frame
+		Matrix3d mR;
+		mR = Eigen::Quaterniond(
+				 f.m_vQ.w,
+				 f.m_vQ.x,
+				 f.m_vQ.y,
+				 f.m_vQ.z)
+				 .toRotationMatrix();
+
+		Matrix4d mT = Matrix4d::Identity();
+		mT.block(0, 0, 3, 3) = mR;
+		mT(0, 3) = f.m_vT.x;
+		mT(1, 3) = f.m_vT.y;
+		mT(2, 3) = f.m_vT.z;
+
+		Matrix4d mW2C = mT.inverse();
+		Matrix4d mW2S = m_mCamInt * mW2C * m_mCSoffset;
+
+		for (int i = 0; i < pcRaw.points_.size(); i++)
+		{
+			Vector3d vPraw = pcRaw.points_[i];
+			Vector4d vPw = {vPraw[0], vPraw[1], vPraw[2], 1};
+			Vector4d vScr = mW2S * vPw;
+
+			Vector3d vP;
+			Vector3d vC;
+
+			pPC->points_.push_back(vP);
+			pPC->colors_.push_back(vC);
+		}
+	}
+
+	bool _fastLioScanRGB::saveModel(string fModel)
+	{
+		IF_F(check() < 0);
+
+		if (fModel.empty())
+			fModel = m_fModel;
+
+		IF_F(!io::WritePointCloud(fModel, m_pcModelRGB));
+		LOG_I("Write point cloud: " + i2str(m_pcModelRGB.points_.size()));
+
 		return true;
 	}
 
 	void _fastLioScanRGB::clearModel(void)
 	{
-		m_jArray.clear();
+		m_pcModel.Clear();
 	}
 
-	bool _fastLioScanRGB::loadCamConfig(const string &fConfig)
+	bool _fastLioScanRGB::loadCamConfig(string fConfig)
 	{
+		if (fConfig.empty())
+			fConfig = m_fCamConfig;
+
 		string s;
 		if (!readFile(fConfig, &s))
 		{
@@ -118,13 +187,16 @@ namespace kai
 		object &obj = v.get<object>();
 		value vi = obj["camIntrinsic"];
 		IF_F(!vi.is<object>());
-		object ci = vi.get<object>(); 
+		object ci = vi.get<object>();
 
 		m_camIntrinsic.m_Fx = ci["Fx"].get<double>();
 		m_camIntrinsic.m_Fy = ci["Fy"].get<double>();
 		m_camIntrinsic.m_Gamma = ci["Gamma"].get<double>();
 		m_camIntrinsic.m_Cx = ci["Cx"].get<double>();
-		m_camIntrinsic.m_Cx = ci["Cx"].get<double>();
+		m_camIntrinsic.m_Cy = ci["Cy"].get<double>();
+		m_camIntrinsic.m_vCSoffset.x = ci["vCSoffsetX"].get<double>();
+		m_camIntrinsic.m_vCSoffset.y = ci["vCSoffsetY"].get<double>();
+		m_camIntrinsic.m_vCSoffset.z = ci["vCSoffsetZ"].get<double>();
 
 		return true;
 	}
@@ -139,23 +211,34 @@ namespace kai
 		m_mCamInt(1, 2) = m_camIntrinsic.m_Cy;
 	}
 
-	bool _fastLioScanRGB::saveCamConfig(const string &fConfig)
+	bool _fastLioScanRGB::saveCamConfig(string fConfig)
 	{
+		if (fConfig.empty())
+			fConfig = m_fCamConfig;
+
 		picojson::object o;
-		o.insert(make_pair("name", "camIntrinsic"));
 		o.insert(make_pair("Fx", value(m_camIntrinsic.m_Fx)));
 		o.insert(make_pair("Fy", value(m_camIntrinsic.m_Fy)));
 		o.insert(make_pair("Gamma", value(m_camIntrinsic.m_Gamma)));
 		o.insert(make_pair("Cx", value(m_camIntrinsic.m_Cx)));
 		o.insert(make_pair("Cy", value(m_camIntrinsic.m_Cy)));
+		o.insert(make_pair("vCSoffsetX", value(m_camIntrinsic.m_vCSoffset.x)));
+		o.insert(make_pair("vCSoffsetY", value(m_camIntrinsic.m_vCSoffset.y)));
+		o.insert(make_pair("vCSoffsetZ", value(m_camIntrinsic.m_vCSoffset.z)));
 
-		string f = picojson::value(o).serialize();
+		picojson::object jo;
+		jo.insert(make_pair("camIntrinsic", o));
+
+		string f = picojson::value(jo).serialize();
 
 		return writeFile(fConfig, f);
 	}
 
-	bool _fastLioScanRGB::loadCamTraj(const string &fTraj)
+	bool _fastLioScanRGB::loadCamTraj(string fTraj)
 	{
+		if (fTraj.empty())
+			fTraj = m_fCamTraj;
+
 		string s;
 		if (!readFile(fTraj, &s))
 		{
@@ -168,12 +251,14 @@ namespace kai
 		IF_Fl(!err.empty(), err);
 
 		object &obj = v.get<object>();
-		picojson::array &ary = obj["camTraj"].get<picojson::array>();
+		IF_F(!obj["imgTraj"].is<picojson::array>());
+		picojson::array &ary = obj["imgTraj"].get<picojson::array>();
 		for (value &rec : ary)
 		{
 			object &o = rec.get<object>();
-			IF_CONT(o["fImg"].is<string>());
-			IF_CONT(o["vmT"].is<value::array>());
+			IF_CONT(!o["fImg"].is<string>());
+			IF_CONT(!o["vQ"].is<value::array>());
+			IF_CONT(!o["vT"].is<value::array>());
 
 			string fImg = o["fImg"].get<string>();
 			Mat m = imread(fImg);
@@ -182,33 +267,31 @@ namespace kai
 			FASTLIO_SCAN_FRAME f;
 			f.m_mRGB = m;
 
-			f.m_mT = Matrix4d::Zero();
-			value::array amT = o["vmT"].get<value::array>();
-			int i = 0;
-			f.m_mT(0, 0) = amT[i++].get<double>();
-			f.m_mT(0, 1) = amT[i++].get<double>();
-			f.m_mT(0, 2) = amT[i++].get<double>();
-			f.m_mT(0, 3) = amT[i++].get<double>();
+			value::array vQ = o["vQ"].get<value::array>();
+			f.m_vQ.x = vQ[0].get<double>();
+			f.m_vQ.y = vQ[1].get<double>();
+			f.m_vQ.z = vQ[2].get<double>();
+			f.m_vQ.w = vQ[3].get<double>();
 
-			f.m_mT(1, 0) = amT[i++].get<double>();
-			f.m_mT(1, 1) = amT[i++].get<double>();
-			f.m_mT(1, 2) = amT[i++].get<double>();
-			f.m_mT(1, 3) = amT[i++].get<double>();
-
-			f.m_mT(2, 0) = amT[i++].get<double>();
-			f.m_mT(2, 1) = amT[i++].get<double>();
-			f.m_mT(2, 2) = amT[i++].get<double>();
-			f.m_mT(2, 3) = amT[i++].get<double>();
-
-			f.m_mT(3, 0) = amT[i++].get<double>();
-			f.m_mT(3, 1) = amT[i++].get<double>();
-			f.m_mT(3, 2) = amT[i++].get<double>();
-			f.m_mT(3, 3) = amT[i++].get<double>();
+			value::array vT = o["vT"].get<value::array>();
+			f.m_vT.x = vT[0].get<double>();
+			f.m_vT.y = vT[1].get<double>();
+			f.m_vT.z = vT[2].get<double>();
 
 			m_vFrame.push_back(f);
 		}
 
 		return true;
+	}
+
+	void _fastLioScanRGB::setCamIntrinsic(FASTLIO_SCAN_CAM_INTRINSIC &ci)
+	{
+		m_camIntrinsic = ci;
+	}
+
+	FASTLIO_SCAN_CAM_INTRINSIC _fastLioScanRGB::getCamIntrinsic(void)
+	{
+		return m_camIntrinsic;
 	}
 
 	void _fastLioScanRGB::console(void *pConsole)
@@ -218,7 +301,12 @@ namespace kai
 		IF_(check() < 0);
 
 		_Console *pC = (_Console *)pConsole;
-		//		pC->addMsg("Uploading: " + m_fName);
+		pC->addMsg("Fx = " + f2str(m_camIntrinsic.m_Fx));
+		pC->addMsg("Fy = " + f2str(m_camIntrinsic.m_Fy));
+		pC->addMsg("Gamma = " + f2str(m_camIntrinsic.m_Gamma));
+		pC->addMsg("Cx = " + f2str(m_camIntrinsic.m_Cx));
+		pC->addMsg("Cy = " + f2str(m_camIntrinsic.m_Cy));
+		pC->addMsg("vCSoffset = (" + f2str(m_camIntrinsic.m_vCSoffset.x) + ", " + f2str(m_camIntrinsic.m_vCSoffset.y) + ", " + f2str(m_camIntrinsic.m_vCSoffset.z) + ")");
 	}
 
 }

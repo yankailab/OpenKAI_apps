@@ -13,11 +13,7 @@
 #include <OpenKAI/Navigation/_NavBase.h>
 #include <OpenKAI/Utility/utilEvent.h>
 #include <OpenKAI/Utility/utilFile.h>
-#include "_fastLioScanRGB.h"
 
-using namespace open3d;
-using namespace open3d::geometry;
-using namespace open3d::visualization;
 using namespace Eigen;
 
 namespace kai
@@ -43,11 +39,6 @@ namespace kai
 
 		void scanStart(picojson::object& jo);
 		void scanStop(picojson::object& jo);
-		void exportModel(picojson::object& jo);
-		void setParam(picojson::object& jo);
-		void saveParam(picojson::object& jo);
-		void getParam(picojson::object& jo);
-		void getParamSaved(picojson::object& jo);
 
 	private:
 		void updateScan(void);
@@ -69,7 +60,6 @@ namespace kai
 	protected:
 		_VisionBase* m_pV;
 		_NavBase* m_pNav;
-		_fastLioScanRGB* m_pFLSrgb;
 
 		int m_iTake;
 		INTERVAL_EVENT m_ieShutter;

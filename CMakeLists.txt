@@ -71,9 +71,13 @@ target_link_libraries(helloAP ${OKapps_lib})
 endif()
 
 if(WITH_FASTLIO_SCAN)
-file(GLOB_RECURSE OKapps_cpp_fastLioScan src/fastLioScan/*.cpp)
+set(OKapps_cpp_fastLioScan src/fastLioScan/scan.cpp src/fastLioScan/_fastLioScan.cpp)
 add_executable(fastLioScan ${OKapps_cpp} ${OKapps_cpp_fastLioScan})
 target_link_libraries(fastLioScan ${OKapps_lib})
+
+set(OKapps_cpp_fastLioRGB src/fastLioScan/rgb.cpp src/fastLioScan/_fastLioRGB.cpp)
+add_executable(fastLioRGB ${OKapps_cpp} ${OKapps_cpp_fastLioRGB})
+target_link_libraries(fastLioRGB ${OKapps_lib})
 endif()
 
 if(USE_ROS)

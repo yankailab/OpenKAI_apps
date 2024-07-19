@@ -1,6 +1,6 @@
 #include <OpenKAI/OpenKAI.h>
 #include "_fastLioScan.h"
-#include "_fastLioScanRGB.h"
+#include "_fastLioRGB.h"
 
 using namespace std;
 using namespace kai;
@@ -37,11 +37,7 @@ int main(int argc, char* argv[])
 		return 1;
 
 	// add user app modules
-	_fastLioScan* pFLscan = new _fastLioScan();
-	if(!g_pOK->addModule(pFLscan, "fastLioScan"))
-		return 1;
-
-	_fastLioScanRGB* pFLscanRGB = new _fastLioScanRGB();
+	_fastLioRGB* pFLscanRGB = new _fastLioRGB();
 	if(!g_pOK->addModule(pFLscanRGB, "fastLioScanRGB"))
 		return 1;
 

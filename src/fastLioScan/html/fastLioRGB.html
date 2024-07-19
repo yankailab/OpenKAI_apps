@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>fastLioRGB</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- Dark MDB theme -->
+  <link rel="stylesheet" href="css/mdb.dark.min.css" />
+  <!-- Regular MDB theme -->
+  <!-- <link rel="stylesheet" href="css/mdb.min.css" /> -->
+
+</head>
+
+<body>
+
+  <!-- Start your project here-->
+  <section>
+    <div class="text-center">
+      <h5><strong id="state">State</strong></h5>
+    </div>
+  </section>
+
+  <section>
+    <div class="text-center">
+      <strong id="msg"></strong>
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="text-center">
+      <h5><strong>Scan control</strong></h5>
+    </div>
+  </section>
+
+  <section>
+    <div class="text-center">
+      <input id="Project folder" style="WIDTH: 500px; HEIGHT: 50px" value="/home/user/">
+      <button id="btnLoadModel" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Load Project</button>
+      <button id="btnExportModel" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Export Color Point Cloud Model</button>
+      </br>
+      </br>
+
+      <h5><strong>RGB Camera config</strong></h5>
+      <button id="btnGetCamConfig" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Get Camera Config</button>
+      <button id="btnSaveCamConfig" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Save Camera Config</button>
+      </br>
+
+      <p style="color:red;font-weight: bold;">Fx</p>
+      <input id="Fx" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="FxInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="FxDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:green;font-weight: bold;">Fy</p>
+      <input id="Fy" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="FyInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="FyDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:blue;font-weight: bold;">Gamma</p>
+      <input id="Gamma" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="GammaInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="GammaDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:red;font-weight: bold;">Cx</p>
+      <input id="Cx" style="WIDTH: 150px; HEIGHT: 50px" value=0.5>
+      <button id="CxInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="CxDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:green;font-weight: bold;">Cy</p>
+      <input id="Cy" style="WIDTH: 150px; HEIGHT: 50px" value=0.5>
+      <button id="CyInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="CyDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:red;font-weight: bold;">OfsX</p>
+      <input id="OfsX" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="OfsXInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="OfsXDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:green;font-weight: bold;">OfsY</p>
+      <input id="OfsY" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="OfsYInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="OfsYDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+
+      <p style="color:blue;font-weight: bold;">OfsZ</p>
+      <input id="OfsZ" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="OfsZInc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="OfsZDec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+      </br>
+      </br>
+
+    </div>
+  </section>
+  <hr>
+
+  <!--    <div id="map"></div> -->
+
+  <!-- End your project here-->
+
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript"></script>
+  <script src="js/wsUIbase.js"></script>
+  <script src="js/wsUIrgb.js"></script>
+</body>
+
+</html>

@@ -14,7 +14,6 @@ namespace kai
 	{
 		m_pV = nullptr;
 		m_pNav = nullptr;
-		m_pFLSrgb = nullptr;
 
 		m_cmdROStrigger = "";
 		m_cmdOnSaved = "";
@@ -70,11 +69,6 @@ namespace kai
 		m_pNav = (_NavBase *)(pK->findModule(n));
 		IF_Fl(!m_pNav, n + ": not found");
 
-		n = "";
-		pK->v("_fastLioScanRGB", &n);
-		m_pFLSrgb = (_fastLioScanRGB *)(pK->findModule(n));
-		IF_Fl(!m_pFLSrgb, n + ": not found");
-
 		return true;
 	}
 
@@ -93,7 +87,6 @@ namespace kai
 	{
 		NULL__(m_pV, -1);
 		NULL__(m_pNav, -1);
-		NULL__(m_pFLSrgb, -1);
 
 		return this->_JSONbase::check();
 	}
@@ -192,15 +185,12 @@ namespace kai
 		string k = picojson::value(o).serialize();
 		string fName = m_projDir + "traj.json";
 		writeFile(fName, k);
-		m_pFLSrgb->loadCamTraj(fName);
 
 		if (!m_cmdOnSaved.empty())
 		{
 			string cmd = replace(m_cmdOnSaved, "[dirProj]", m_projDir);
 			system(cmd.c_str());
 		}
-
-		m_pFLSrgb->openModel(m_projDir+"scan.pcd");
 	}
 
 	void _fastLioScan::scanClear(void)
@@ -238,16 +228,6 @@ namespace kai
 			scanStart(jo);
 		else if (cmd == "scanStop")
 			scanStop(jo);
-		else if (cmd == "exportModel")
-			exportModel(jo);
-		else if (cmd == "setCamConfig")
-			setParam(jo);
-		else if (cmd == "saveCamConfig")
-			saveParam(jo);
-		else if (cmd == "getCamConfig")
-			getParam(jo);
-		else if (cmd == "getCamConfigSaved")
-			getParamSaved(jo);
 	}
 
 	void _fastLioScan::scanStart(picojson::object &jo)
@@ -259,82 +239,6 @@ namespace kai
 	{
 		scanStop();
 		scanSave();
-	}
-
-	void _fastLioScan::exportModel(picojson::object &jo)
-	{
-		m_pFLSrgb->saveModel(m_projDir + "scanColor.pcd");
-	}
-
-	void _fastLioScan::setParam(picojson::object &jo)
-	{
-		IF_(check() < 0);
-
-		FASTLIO_SCAN_CAM_INTRINSIC ci;
-
-		IF_(!jo["Fx"].is<double>());
-		ci.m_Fx = jo["Fx"].get<double>();
-		IF_(!jo["Fy"].is<double>());
-		ci.m_Fy = jo["Fy"].get<double>();
-		IF_(!jo["Gamma"].is<double>());
-		ci.m_Gamma = jo["Gamma"].get<double>();
-		IF_(!jo["Cx"].is<double>());
-		ci.m_Cx = jo["Cx"].get<double>();
-		IF_(!jo["Cy"].is<double>());
-		ci.m_Cy = jo["Cy"].get<double>();
-
-		IF_(!jo["OfsX"].is<double>());
-		ci.m_vCSoffset.x = jo["OfsX"].get<double>();
-		IF_(!jo["OfsY"].is<double>());
-		ci.m_vCSoffset.y = jo["OfsY"].get<double>();
-		IF_(!jo["OfsZ"].is<double>());
-		ci.m_vCSoffset.z = jo["OfsZ"].get<double>();
-
-		// IF_(!jo["vCSoffset"].is<value::array>());
-		// value::array vCS = jo["vCSoffset"].get<value::array>();
-		// ci.m_vCSoffset.x = vCS[0].get<double>();
-		// ci.m_vCSoffset.y = vCS[1].get<double>();
-		// ci.m_vCSoffset.z = vCS[2].get<double>();
-
-		m_pFLSrgb->setCamIntrinsic(ci);
-	}
-
-	void _fastLioScan::saveParam(picojson::object &jo)
-	{
-		IF_(check() < 0);
-
-		m_pFLSrgb->saveCamConfig();
-
-		return;
-	}
-
-	void _fastLioScan::getParam(picojson::object &jo)
-	{
-		IF_(check() < 0);
-
-		FASTLIO_SCAN_CAM_INTRINSIC ci;
-		ci = m_pFLSrgb->getCamIntrinsic();
-
-		object r;
-		JO(r, "cmd", "getParam");
-		JO(r, "Fx", ci.m_Fx);
-		JO(r, "Fy", ci.m_Fy);
-		JO(r, "Gamma", ci.m_Gamma);
-		JO(r, "Cx", ci.m_Cx);
-		JO(r, "Cy", ci.m_Cy);
-		JO(r, "OfsX", ci.m_vCSoffset.x);
-		JO(r, "OfsY", ci.m_vCSoffset.y);
-		JO(r, "OfsZ", ci.m_vCSoffset.z);
-
-		sendMsg(r);
-	}
-
-	void _fastLioScan::getParamSaved(picojson::object &jo)
-	{
-		IF_(check() < 0);
-
-		m_pFLSrgb->loadCamConfig();
-		getParam(jo);
 	}
 
 	void _fastLioScan::console(void *pConsole)

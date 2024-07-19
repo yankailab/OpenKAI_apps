@@ -1,14 +1,14 @@
 /*
- * _fastLioScanRGB.h
+ * _fastLioRGB.h
  *
  *  Created on: July 17, 2024
  *      Author: yankai
  */
 
-#ifndef OpenKAI_src_fastLioScan__fastLioScanRGB_H_
-#define OpenKAI_src_fastLioScan__fastLioScanRGB_H_
+#ifndef OpenKAI_src_fastLioScan__fastLioRGB_H_
+#define OpenKAI_src_fastLioScan__fastLioRGB_H_
 
-#include <OpenKAI/Base/_ModuleBase.h>
+#include <OpenKAI/Protocol/_JSONbase.h>
 #include <OpenKAI/3D/PointCloud/_PCframe.h>
 #include <OpenKAI/Utility/utilEvent.h>
 
@@ -37,11 +37,11 @@ namespace kai
 		vFloat3 m_vT = {0,0,0};
 	};
 
-	class _fastLioScanRGB : public _ModuleBase
+	class _fastLioRGB : public _JSONbase
 	{
 	public:
-		_fastLioScanRGB(void);
-		virtual ~_fastLioScanRGB();
+		_fastLioRGB(void);
+		virtual ~_fastLioRGB();
 
 		bool init(void *pKiss);
 		bool link(void);
@@ -49,31 +49,43 @@ namespace kai
 		int check(void);
 		void console(void *pConsole);
 
-		bool openModel(string fModel = "");
+		bool loadModel(string fModel = "");
 		void updateModel(void);
 		bool saveModel(string fModel = "");
 		void clearModel(void);
 
 		bool loadCamConfig(string fConfig = "");
-		void updateCamConfig(const FASTLIO_SCAN_CAM_INTRINSIC& c);
 		bool saveCamConfig(string fConfig = "");
-
 		bool loadCamTraj(string fTraj = "");
 
-		void setCamIntrinsic(FASTLIO_SCAN_CAM_INTRINSIC& ci);
-		FASTLIO_SCAN_CAM_INTRINSIC getCamIntrinsic(void);
+		void loadProj(picojson::object& jo);
+		void exportModel(picojson::object& jo);
+		void setParam(picojson::object& jo);
+		void saveParam(picojson::object& jo);
+		void getParam(picojson::object& jo);
+		void getParamSaved(picojson::object& jo);
 
 	private:
 		void updateFrame(const PointCloud& pcRaw, PointCloud* pPC, const FASTLIO_SCAN_FRAME& f);
 		void update(void);
 		static void *getUpdate(void *This)
 		{
-			((_fastLioScanRGB *)This)->update();
+			((_fastLioRGB *)This)->update();
+			return NULL;
+		}
+
+		void handleMsg(const string &str);
+		void updateR(void);
+		static void *getUpdateR(void *This)
+		{
+			((_fastLioRGB *)This)->updateR();
 			return NULL;
 		}
 
 	protected:
-		string m_fModel;
+		string m_projDir;
+		string m_fModelIn;
+		string m_fModelOut;
 		string m_fCamConfig;
 		string m_fCamTraj;
 

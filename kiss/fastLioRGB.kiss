@@ -14,7 +14,7 @@
 		"name":"thread",
 		"FPS":30,
 	}
-	"vBASE":["fastLioScanRGB"],
+	"vBASE":["fastLioRGB"],
 }
 
 {
@@ -44,12 +44,17 @@
 		"FPS":10,
 	}
 	"bLog":1,
+	"_IObase":"ws",
+	"msgFinishSend":"",
+	"msgFinishRecv":"EOJ",
+	"ieSendHB":500000,
+
 	"_PCframe":"pcFrame",
 	"projDir":"",
 	"fModelIn":"scan.pcd",
 	"fModelOut":"scanRGB.pcd",
-	"fCamConfig":"camConfig.json",
 	"fCamTraj":"camTraj.json",
+	"fCamConfig":"camConfig.json",
 }
 
 {
@@ -67,7 +72,7 @@
 {
 	"name":"gv",
 	"class":"_GeometryViewer",
-	"bON":0,
+	"bON":1,
     {
 		"name":"thread",
 		"FPS":10,
@@ -80,10 +85,10 @@
 	"pathRes":"/usr/local/bin/Open3D/resources",
 	"device":"CPU:0",
 	"vCamLookAt":[0,0,0],
-	"vCamEye":[0,2,0],
+	"vCamEye":[-2,0,0],
 	"vCamUp":[0,0,1],
 	"vCamAutoLookAt":[0,0,0],
-	"vCamAutoEye":[0,2,0],
+	"vCamAutoEye":[-2,0,0],
 	"vCamAutoUp":[0,0,1],
 	"vCoR":[0,0,0],
 	"camFov":75,

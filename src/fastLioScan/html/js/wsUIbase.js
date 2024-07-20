@@ -12,7 +12,8 @@ function wsInit()
 
   wsSocket.onmessage = function(event)
   {
-      jc = JSON.parse(event.data);
+    $('#state').innerHTML = 'Received: ' + event.data;
+    jc = JSON.parse(event.data);
       cmdHandler(jc);
   };
 

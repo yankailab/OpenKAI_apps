@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
 	// add user app modules
 	_fastLioRGB* pFLscanRGB = new _fastLioRGB();
-	if(!g_pOK->addModule(pFLscanRGB, "fastLioScanRGB"))
+	if(!g_pOK->addModule(pFLscanRGB, "fastLioRGB"))
 		return 1;
 
     // init all modules altogether

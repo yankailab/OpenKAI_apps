@@ -6,18 +6,10 @@ window.onload = function () {
     var strEOJ = "EOJ";
     var dV = 0.1;
 
-    $('#btnStartScan').onclick = function (e) {
+    $('#btnLoadProj').onclick = function (e) {
         var cmd = {
-            cmd: 'scanStart',
-        };
-
-        cmdStr = JSON.stringify(cmd) + strEOJ;
-        wsSocket.send(cmdStr);
-    };
-
-    $('#btnStopScan').onclick = function (e) {
-        var cmd = {
-            cmd: 'scanStop',
+            cmd: 'loadProj',
+            projDir: $('#projDir').value,
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
@@ -42,14 +34,24 @@ window.onload = function () {
         wsSocket.send(cmdStr);
     };
 
-    $('#btnGetCamConfigSaved').onclick = function (e) {
+    // $('#btnGetCamConfigSaved').onclick = function (e) {
+    //     var cmd = {
+    //         cmd: 'getCamConfigSaved',
+    //     };
+
+    //     cmdStr = JSON.stringify(cmd) + strEOJ;
+    //     wsSocket.send(cmdStr);
+    // };
+
+    $('#btnSaveCamConfig').onclick = function (e) {
         var cmd = {
-            cmd: 'getCamConfigSaved',
+            cmd: 'saveCamConfig',
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
         wsSocket.send(cmdStr);
     };
+
 
     $('#FxInc').onclick = function (e) {
         $('#Fx').value = parseFloat($('#Fx').value) + dV;
@@ -101,33 +103,64 @@ window.onload = function () {
         cmdSetCamConfig();
     };
 
-    $('#OfsXInc').onclick = function (e) {
-        $('#OfsX').value = parseFloat($('#OfsX').value) + dV;
+    $('#vCStXInc').onclick = function (e) {
+        $('#vCStX').value = parseFloat($('#vCStX').value) + dV;
         cmdSetCamConfig();
     };
 
-    $('#OfsXDec').onclick = function (e) {
-        $('#OfsX').value = parseFloat($('#OfsX').value) - dV;
+    $('#vCStXDec').onclick = function (e) {
+        $('#vCStX').value = parseFloat($('#vCStX').value) - dV;
         cmdSetCamConfig();
     };
 
-    $('#OfsYInc').onclick = function (e) {
-        $('#OfsY').value = parseFloat($('#OfsY').value) + dV;
+    $('#vCStYInc').onclick = function (e) {
+        $('#vCStY').value = parseFloat($('#vCStY').value) + dV;
         cmdSetCamConfig();
     };
 
-    $('#OfsYDec').onclick = function (e) {
-        $('#OfsY').value = parseFloat($('#OfsY').value) - dV;
+    $('#vCStYDec').onclick = function (e) {
+        $('#vCStY').value = parseFloat($('#vCStY').value) - dV;
         cmdSetCamConfig();
     };
 
-    $('#OfsZInc').onclick = function (e) {
-        $('#OfsZ').value = parseFloat($('#OfsZ').value) + dV;
+    $('#vCStZInc').onclick = function (e) {
+        $('#vCStZ').value = parseFloat($('#vCStZ').value) + dV;
         cmdSetCamConfig();
     };
 
-    $('#OfsZDec').onclick = function (e) {
-        $('#OfsZ').value = parseFloat($('#OfsZ').value) - dV;
+    $('#vCStZDec').onclick = function (e) {
+        $('#vCStZ').value = parseFloat($('#vCStZ').value) - dV;
+        cmdSetCamConfig();
+    };
+
+    
+    $('#vCSrXInc').onclick = function (e) {
+        $('#vCSrX').value = parseFloat($('#vCSrX').value) + dV;
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrXDec').onclick = function (e) {
+        $('#vCSrX').value = parseFloat($('#vCSrX').value) - dV;
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrYInc').onclick = function (e) {
+        $('#vCSrY').value = parseFloat($('#vCSrY').value) + dV;
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrYDec').onclick = function (e) {
+        $('#vCSrY').value = parseFloat($('#vCSrY').value) - dV;
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrZInc').onclick = function (e) {
+        $('#vCSrZ').value = parseFloat($('#vCSrZ').value) + dV;
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrZDec').onclick = function (e) {
+        $('#vCSrZ').value = parseFloat($('#vCSrZ').value) - dV;
         cmdSetCamConfig();
     };
 
@@ -152,15 +185,28 @@ window.onload = function () {
         cmdSetCamConfig();
     };
 
-    $('#OfsX').oninput = function (e) {
+    $('#vCStX').oninput = function (e) {
         cmdSetCamConfig();
     };
 
-    $('#OfsY').oninput = function (e) {
+    $('#vCStY').oninput = function (e) {
         cmdSetCamConfig();
     };
 
-    $('#OfsZ').oninput = function (e) {
+    $('#vCStZ').oninput = function (e) {
+        cmdSetCamConfig();
+    };
+
+
+    $('#vCSrX').oninput = function (e) {
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrY').oninput = function (e) {
+        cmdSetCamConfig();
+    };
+
+    $('#vCSrZ').oninput = function (e) {
         cmdSetCamConfig();
     };
 
@@ -174,18 +220,12 @@ window.onload = function () {
             Gamma: parseFloat($('#Gamma').value),
             Cx: parseFloat($('#Cx').value),
             Cy: parseFloat($('#Cy').value),
-            OfsX: parseFloat($('#OfsX').value),
-            OfsY: parseFloat($('#OfsY').value),
-            OfsZ: parseFloat($('#OfsZ').value),
-        };
-
-        cmdStr = JSON.stringify(cmd) + strEOJ;
-        wsSocket.send(cmdStr);
-    };
-
-    $('#btnSaveCamConfig').onclick = function (e) {
-        var cmd = {
-            cmd: 'saveCamConfig',
+            vCStX: parseFloat($('#vCStX').value),
+            vCStY: parseFloat($('#vCStY').value),
+            vCStZ: parseFloat($('#vCStZ').value),
+            vCSrX: parseFloat($('#vCSrX').value),
+            vCSrY: parseFloat($('#vCSrY').value),
+            vCSrZ: parseFloat($('#vCSrZ').value),
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
@@ -201,8 +241,11 @@ function cmdHandler(jCmd) {
         $('#Gamma').value = jCmd.Gamma;
         $('#Cx').value = jCmd.Cx;
         $('#Cy').value = jCmd.Cy;
-        $('#OfsX').value = jCmd.OfsX;
-        $('#OfsY').value = jCmd.OfsY;
-        $('#OfsZ').value = jCmd.OfsZ;
+        $('#vCStX').value = jCmd.vCStX;
+        $('#vCStY').value = jCmd.vCStY;
+        $('#vCStZ').value = jCmd.vCStZ;
+        $('#vCSrX').value = jCmd.vCSrX;
+        $('#vCSrY').value = jCmd.vCSrY;
+        $('#vCSrZ').value = jCmd.vCSrZ;
     }
 }

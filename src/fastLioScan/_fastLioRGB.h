@@ -27,7 +27,8 @@ namespace kai
 		double m_Gamma = 0;
 		double m_Cx = 0.5;
 		double m_Cy = 0.5;
-		vDouble3 m_vCSoffset = {0,0,0};
+		vDouble3 m_vCSt = {0,0,0};
+		vDouble3 m_vCSr = {0,0,0};
 	};
 
 	struct FASTLIO_SCAN_FRAME
@@ -66,6 +67,7 @@ namespace kai
 		void getParamSaved(picojson::object& jo);
 
 	private:
+		void updateCamIntrinsicMatrix(void);
 		void updateFrame(const PointCloud& pcRaw, PointCloud* pPC, const FASTLIO_SCAN_FRAME& f);
 		void update(void);
 		static void *getUpdate(void *This)
@@ -89,13 +91,13 @@ namespace kai
 		string m_fCamConfig;
 		string m_fCamTraj;
 
-		PointCloud m_pcModel;
-		PointCloud m_pcModelRGB;
+		PointCloud m_pcModelIn;
+		PointCloud m_pcModelOut;
 		_PCframe* m_pPC;
 
 		FASTLIO_SCAN_CAM_INTRINSIC m_camIntrinsic;
-		Matrix4d m_mCamInt;
-		Matrix4d m_mCSoffset;	// cam sensor offset
+		Matrix4d m_mCi;	// cam intrinsic
+		Matrix4d m_mCS;	// cam to slam
 
 		vector<FASTLIO_SCAN_FRAME> m_vFrame;
 

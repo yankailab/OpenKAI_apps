@@ -89,7 +89,9 @@ namespace kai
 		string m_fModelIn;
 		string m_fModelOut;
 		string m_fCamConfig;
+		string m_fCamConfigDefault;
 		string m_fCamTraj;
+		float m_vdSize;
 
 		PointCloud m_pcModelIn;
 		PointCloud m_pcModelOut;

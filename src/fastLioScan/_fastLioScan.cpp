@@ -20,6 +20,7 @@ namespace kai
 
 		m_bScanning = false;
 		m_dir = "/home/";
+		m_fCamTraj = "camTraj.json";
 		m_projDir = "";
 		m_bFlipRGB = false;
 		m_quality = 100;
@@ -38,6 +39,7 @@ namespace kai
 
 		pK->v("cmdROStrigger", &m_cmdROStrigger);
 		pK->v("cmdOnSaved", &m_cmdOnSaved);
+		pK->v("fCamTraj", &m_fCamTraj);
 
 		float tInt = 0.5;
 		pK->v("tInt", &tInt);
@@ -183,7 +185,7 @@ namespace kai
 		o.insert(make_pair("imgTraj", m_jArrCamTraj));
 
 		string k = picojson::value(o).serialize();
-		string fName = m_projDir + "traj.json";
+		string fName = m_projDir + m_fCamTraj;
 		writeFile(fName, k);
 
 		if (!m_cmdOnSaved.empty())

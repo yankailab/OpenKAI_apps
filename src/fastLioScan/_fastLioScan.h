@@ -65,6 +65,7 @@ namespace kai
 		INTERVAL_EVENT m_ieShutter;
 		picojson::array m_jArrCamTraj;
 
+		string m_fCamTraj;
 		string m_cmdROStrigger;
 		string m_cmdOnSaved;
 

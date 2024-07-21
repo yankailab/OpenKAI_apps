@@ -55,6 +55,8 @@
 	"fModelOut":"scanRGB.pcd",
 	"fCamTraj":"camTraj.json",
 	"fCamConfig":"camConfig.json",
+	"fCamConfigDefault":"/home/kai/Downloads/fastLioScanTest/camConfig.json",
+	"vdSize":0.01,
 }
 
 {

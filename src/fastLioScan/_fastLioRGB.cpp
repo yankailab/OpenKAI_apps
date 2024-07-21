@@ -16,7 +16,9 @@ namespace kai
 		m_fModelIn = "scan.pcd";
 		m_fModelOut = "scanRGB.pcd";
 		m_fCamConfig = "camConfig.json";
+		m_fCamConfigDefault = "camConfig.json";
 		m_fCamTraj = "camTraj.json";
+		m_vdSize = 0.01;
 
 		m_pPC = nullptr;
 	}
@@ -34,7 +36,9 @@ namespace kai
 		pK->v("fModelIn", &m_fModelIn);
 		pK->v("fModelOut", &m_fModelOut);
 		pK->v("fCamConfig", &m_fCamConfig);
+		pK->v("fCamConfigDefault", &m_fCamConfigDefault);
 		pK->v("fCamTraj", &m_fCamTraj);
+		pK->v("vdSize", &m_vdSize);
 
 		return true;
 	}
@@ -109,8 +113,6 @@ namespace kai
 		for (FASTLIO_SCAN_FRAME f : m_vFrame)
 		{
 			updateFrame(m_pcModelIn, &m_pcModelOut, f);
-
-			break;
 		}
 
 		*m_pPC->getNextBuffer() = m_pcModelOut;
@@ -169,27 +171,26 @@ namespace kai
 
 			Vector4d vPc = mWC * vPw;
 			Vector4d vPcs =
-			{
-				-vPc[1],
-				-vPc[2],
-				vPc[0],
-				1
-			};
+				{
+					-vPc[1],
+					-vPc[2],
+					vPc[0],
+					1};
 			IF_CONT(vPcs[2] < 0);
 
 			Vector4d vPs = m_mCi * vPcs;
-			vPs *= 1.0/vPcs[2];
+			vPs *= 1.0 / vPcs[2];
 
-			vFloat2 vScr = {0,1};
+			vFloat2 vScr = {0, 1};
 			IF_CONT(!vScr.bInside(vPs[0]));
 			IF_CONT(!vScr.bInside(vPs[1]));
 
 			int px = vPs[0] * f.m_mRGB.cols;
 			int py = vPs[1] * f.m_mRGB.rows;
-			cv::Vec3b vCol = f.m_mRGB.at<cv::Vec3b>(py, px);			
+			cv::Vec3b vCol = f.m_mRGB.at<cv::Vec3b>(py, px);
 
 			Vector3d vC = {vCol[2], vCol[1], vCol[0]};
-			vC *= 1.0/255.0;
+			vC *= 1.0 / 255.0;
 
 			pPC->points_.push_back(vPraw);
 			pPC->colors_.push_back(vC);
@@ -208,6 +209,10 @@ namespace kai
 		IF_F(!io::WritePointCloud(fModel, m_pcModelOut));
 		LOG_I("Write point cloud: " + i2str(m_pcModelOut.points_.size()));
 
+		PointCloud pcVD = *m_pcModelOut.VoxelDownSample(m_vdSize);
+		IF_F(!io::WritePointCloud(fModel + ".vd.pcd", pcVD));
+		LOG_I("Write voxel down point cloud: " + i2str(pcVD.points_.size()));
+
 		return true;
 	}
 
@@ -225,7 +230,12 @@ namespace kai
 		if (!readFile(fConfig, &s))
 		{
 			LOG_I("Cannot open: " + fConfig);
-			return false;
+
+			if (!readFile(m_fCamConfigDefault, &s))
+			{
+				LOG_I("Cannot open: " + m_fCamConfigDefault);
+				return false;
+			}
 		}
 
 		value v;
@@ -497,6 +507,8 @@ namespace kai
 		this->_JSONbase::console(pConsole);
 
 		_Console *pC = (_Console *)pConsole;
+		pC->addMsg("NpModelIn = " + i2str(m_pcModelIn.points_.size()));
+		pC->addMsg("NpModelOut = " + i2str(m_pcModelOut.points_.size()));
 		pC->addMsg("Fx = " + f2str(m_camIntrinsic.m_Fx));
 		pC->addMsg("Fy = " + f2str(m_camIntrinsic.m_Fy));
 		pC->addMsg("Gamma = " + f2str(m_camIntrinsic.m_Gamma));

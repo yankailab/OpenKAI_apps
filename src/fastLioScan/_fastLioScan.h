@@ -69,6 +69,7 @@ namespace kai
 		string m_cmdROStrigger;
 		string m_cmdOnSaved;
 
+		pid_t m_pidFL;
 		bool m_bScanning;
 		string m_dir;
 		string m_projDir;

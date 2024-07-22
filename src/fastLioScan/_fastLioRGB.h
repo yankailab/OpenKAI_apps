@@ -20,7 +20,7 @@ using namespace Eigen;
 
 namespace kai
 {
-	struct FASTLIO_SCAN_CAM_INTRINSIC
+	struct FASTLIO_RGB_CAM_INTRINSIC
 	{
 		double m_Fx = 0;
 		double m_Fy = 0;
@@ -31,11 +31,16 @@ namespace kai
 		vDouble3 m_vCSr = {0,0,0};
 	};
 
-	struct FASTLIO_SCAN_FRAME
+	struct FASTLIO_RGB_FRAME
 	{
 		Mat m_mRGB;
 		vFloat4 m_vQ = {0,0,0,0};
 		vFloat3 m_vT = {0,0,0};
+	};
+
+	struct FASTLIO_RGB_PC
+	{
+		float m_d = -0.1;
 	};
 
 	class _fastLioRGB : public _JSONbase
@@ -68,7 +73,7 @@ namespace kai
 
 	private:
 		void updateCamIntrinsicMatrix(void);
-		void updateFrame(const PointCloud& pcRaw, PointCloud* pPC, const FASTLIO_SCAN_FRAME& f);
+		void updateFrame(const PointCloud& pcRaw, PointCloud* pPC, const FASTLIO_RGB_FRAME& f);
 		void update(void);
 		static void *getUpdate(void *This)
 		{
@@ -96,12 +101,13 @@ namespace kai
 		PointCloud m_pcModelIn;
 		PointCloud m_pcModelOut;
 		_PCframe* m_pPC;
+		FASTLIO_RGB_PC* m_pPCrgb;
 
-		FASTLIO_SCAN_CAM_INTRINSIC m_camIntrinsic;
+		FASTLIO_RGB_CAM_INTRINSIC m_camIntrinsic;
 		Matrix4d m_mCi;	// cam intrinsic
 		Matrix4d m_mCS;	// cam to slam
 
-		vector<FASTLIO_SCAN_FRAME> m_vFrame;
+		vector<FASTLIO_RGB_FRAME> m_vFrame;
 
 	};
 

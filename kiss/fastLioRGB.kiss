@@ -62,7 +62,7 @@
 {
 	"name":"pcFrame",
 	"class":"_PCframe",
-	"bON":1,
+	"bON":0,
     {
 		"name":"thread",
 		"FPS":30,
@@ -74,7 +74,7 @@
 {
 	"name":"gv",
 	"class":"_GeometryViewer",
-	"bON":1,
+	"bON":0,
     {
 		"name":"thread",
 		"FPS":10,

@@ -21,6 +21,7 @@ namespace kai
 		m_vdSize = 0.01;
 
 		m_pPC = nullptr;
+		m_pPCrgb = nullptr;
 	}
 
 	_fastLioRGB::~_fastLioRGB()
@@ -53,7 +54,8 @@ namespace kai
 		n = "";
 		pK->v("_PCframe", &n);
 		m_pPC = (_PCframe *)(pK->findModule(n));
-		IF_Fl(!m_pPC, n + ": not found");
+		if (!m_pPC)
+			LOG_I(n + ": not found");
 
 		return true;
 	}
@@ -71,7 +73,7 @@ namespace kai
 
 	int _fastLioRGB::check(void)
 	{
-		NULL__(m_pPC, -1);
+		//		NULL__(m_pPC, -1);
 
 		return this->_JSONbase::check();
 	}
@@ -110,13 +112,24 @@ namespace kai
 
 		// merge colors with point cloud using current camera config
 		m_pcModelOut.Clear();
-		for (FASTLIO_SCAN_FRAME f : m_vFrame)
+		m_pPCrgb = new FASTLIO_RGB_PC[m_pcModelIn.points_.size()];
+		NULL_(m_pPCrgb);
+
+		for (int i = 0; i < m_pcModelIn.points_.size(); i++)
+			m_pPCrgb->m_d = -1;
+
+		for (FASTLIO_RGB_FRAME f : m_vFrame)
 		{
 			updateFrame(m_pcModelIn, &m_pcModelOut, f);
 		}
 
-		*m_pPC->getNextBuffer() = m_pcModelOut;
-		m_pPC->swapBuffer();
+		if (m_pPC)
+		{
+			*m_pPC->getNextBuffer() = m_pcModelOut;
+			m_pPC->swapBuffer();
+		}
+
+		DEL(m_pPCrgb);
 	}
 
 	void _fastLioRGB::updateCamIntrinsicMatrix(void)
@@ -138,7 +151,7 @@ namespace kai
 		m_mCS(2, 3) = m_camIntrinsic.m_vCSt.z;
 	}
 
-	void _fastLioRGB::updateFrame(const PointCloud &pcRaw, PointCloud *pPC, const FASTLIO_SCAN_FRAME &f)
+	void _fastLioRGB::updateFrame(const PointCloud &pcRaw, PointCloud *pPC, const FASTLIO_RGB_FRAME &f)
 	{
 		NULL_(pPC);
 
@@ -165,6 +178,8 @@ namespace kai
 
 		for (int i = 0; i < pcRaw.points_.size(); i++)
 		{
+			IF_CONT(m_pPCrgb[i].m_d >= 0);
+
 			Vector3d vPraw = pcRaw.points_[i];
 			Vector4d vPw = {vPraw[0], vPraw[1], vPraw[2], 1};
 			// Vector4d vScr = mWS * vPw;
@@ -194,6 +209,8 @@ namespace kai
 
 			pPC->points_.push_back(vPraw);
 			pPC->colors_.push_back(vC);
+
+			m_pPCrgb[i].m_d = 1.0;
 		}
 
 		LOG_I("Point Cloud Model Out: " + i2str(pPC->points_.size()));
@@ -318,7 +335,7 @@ namespace kai
 			Mat m = imread(fImg);
 			IF_CONT(m.empty());
 
-			FASTLIO_SCAN_FRAME f;
+			FASTLIO_RGB_FRAME f;
 			f.m_mRGB = m;
 
 			value::array vQ = o["vQ"].get<value::array>();
@@ -422,14 +439,24 @@ namespace kai
 
 	void _fastLioRGB::exportModel(picojson::object &jo)
 	{
-		saveModel();
+		string r;
+
+		if (saveModel())
+			r = "export mode success";
+		else
+			r = "export mode failed";
+
+		object jR;
+		JO(jR, "cmd", "exportModel");
+		JO(jR, "r", r);
+		sendMsg(jR);
 	}
 
 	void _fastLioRGB::setParam(picojson::object &jo)
 	{
 		IF_(check() < 0);
 
-		FASTLIO_SCAN_CAM_INTRINSIC ci;
+		FASTLIO_RGB_CAM_INTRINSIC ci;
 
 		IF_(!jo["Fx"].is<double>());
 		ci.m_Fx = jo["Fx"].get<double>();

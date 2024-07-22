@@ -126,6 +126,15 @@ namespace kai
 
 		scanClear();
 		m_bScanning = true;
+
+		// int infp, outfp;
+		// string strP = "~/fl.sh";
+		// m_pidFL = popen2(strP.c_str(), &infp, &outfp);
+		// if (m_pidFL <= 0)
+		// {
+		// 	LOG_E("Failed to run command: " + strP);
+		// 	return;
+		// }
 	}
 
 	void _fastLioScan::scanShutter(void)
@@ -174,6 +183,10 @@ namespace kai
 	void _fastLioScan::scanStop(void)
 	{
 		m_bScanning = false;
+
+		// IF_(!m_pidFL);
+		// kill(m_pidFL, SIGKILL);
+		// m_pidFL = 0;
 	}
 
 	void _fastLioScan::scanSave(void)

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>fastLioScan</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- Dark MDB theme -->
+  <link rel="stylesheet" href="css/mdb.dark.min.css" />
+  <!-- Regular MDB theme -->
+  <!-- <link rel="stylesheet" href="css/mdb.min.css" /> -->
+
+</head>
+
+<body>
+
+  <!-- Start your project here-->
+  <section>
+    <div class="text-center">
+      <h5><strong id="state">State</strong></h5>
+    </div>
+  </section>
+
+  <section>
+    <div class="text-center">
+      <strong id="msg"></strong>
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="text-center">
+      <h5><strong>Radar simulator control</strong></h5>
+    </div>
+  </section>
+
+  <section>
+    <div class="text-center">
+
+      <p style="color:red;font-weight: bold;">X axis</p>
+      <input id="X pos" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+      <button id="Xinc" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-primary">+</button>
+      <button id="Xdec" style="WIDTH: 50px; HEIGHT: 50px" type="button" class="btn btn-secondary">-</button>
+      <input id="X step" style="WIDTH: 150px; HEIGHT: 50px" value=0>
+
+
+
+      <button id="btnStartScan" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Start Scan</button>
+      <button id="btnStopScan" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-primary">Stop Scan</button>
+      </br>
+      </br>
+
+    </div>
+  </section>
+  <hr>
+
+  <!--    <div id="map"></div> -->
+
+  <!-- End your project here-->
+
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript"></script>
+  <script src="js/wsUIbase.js"></script>
+  <script src="js/wsUItgrs.js"></script>
+</body>
+
+</html>

@@ -14,14 +14,11 @@ namespace kai
 	{
 		m_pDSx = nullptr;
 		m_pDSy = nullptr;
-		m_bMove = false;
 
 		m_vPos.clear();
 		m_vPtarget.clear();
+		m_vSpeed.set(10);
 		m_posDZ = 0.01;
-		m_motSpd = 10;	// rpm
-		m_vRx.set(0, 2);
-		m_vRy.set(0, 2);
 	}
 
 	_TGRSctrl::~_TGRSctrl()
@@ -35,10 +32,7 @@ namespace kai
 
 		pK->v("posDZ", &m_posDZ);
 		pK->v("vPtarget", &m_vPtarget);
-		pK->v("motSpd", &m_motSpd);
-		pK->v("vRx", &m_vRx);
-		pK->v("vRy", &m_vRy);
-		pK->v("bMove", &m_bMove);
+		pK->v("vSpeed", &m_vSpeed);
 
 		return OK_OK;
 	}
@@ -51,12 +45,12 @@ namespace kai
 		string n;
 
 		n = "";
-		pK->v("_DistSensorBase", &n);
+		pK->v("_DistSensorBaseX", &n);
 		m_pDSx = (_DistSensorBase *)(pK->findModule(n));
 		NULL__(m_pDSx, OK_ERR_NOT_FOUND);
 
 		n = "";
-		pK->v("_DistSensorBase", &n);
+		pK->v("_DistSensorBaseY", &n);
 		m_pDSy = (_DistSensorBase *)(pK->findModule(n));
 		NULL__(m_pDSy, OK_ERR_NOT_FOUND);
 
@@ -124,38 +118,44 @@ namespace kai
 	{
 		IF_(check() < 0);
 
-		if (!m_bMove)
+		// X axis
+		if (m_vPtarget.x > 0)
 		{
-			setMotSpdX(0);
-			setMotSpdY(0);
-			return;
+			float dP = m_vPtarget.x - m_vPos.x;
+			if (abs(dP) > m_posDZ)
+				setMotSpdX(m_vSpeed.x * sign(dP));
+			else
+				setMotSpdX(0);
+		}
+		else
+		{
+			setMotSpdX(m_vSpeed.x);
 		}
 
-		float dP;
-
-		dP = m_vPtarget.x - m_vPos.x;
-		if(abs(dP) > m_posDZ)
-			setMotSpdX(m_motSpd * sign(dP));
+		// Y axis
+		if (m_vPtarget.y > 0)
+		{
+			float dP = m_vPtarget.y - m_vPos.y;
+			if (abs(dP) > m_posDZ)
+				setMotSpdY(m_vSpeed.y * sign(dP));
+			else
+				setMotSpdY(0);
+		}
 		else
-			setMotSpdX(0);
-
-		dP = m_vPtarget.y - m_vPos.y;
-		if(abs(dP) > m_posDZ)
-			setMotSpdY(m_motSpd * sign(dP));
-		else
-			setMotSpdY(0);
-
+		{
+			setMotSpdY(m_vSpeed.y);
+		}
 	}
 
 	void _TGRSctrl::setMotSpdX(float s)
 	{
-		for(_DDSM* pD : m_vMotX)
+		for (_DDSM *pD : m_vMotX)
 			pD->setStarget(s);
 	}
 
 	void _TGRSctrl::setMotSpdY(float s)
 	{
-		for(_DDSM* pD : m_vMotY)
+		for (_DDSM *pD : m_vMotY)
 			pD->setStarget(s);
 	}
 
@@ -184,25 +184,42 @@ namespace kai
 		IF_(!jo["cmd"].is<string>());
 		string cmd = jo["cmd"].get<string>();
 
-		if (cmd == "moveStep")
-			moveStep(jo);
-		else if (cmd == "moveStop")
-			moveStop(jo);
+		if (cmd == "move")
+			move(jo);
+		else if (cmd == "stop")
+			stop(jo);
 	}
 
-	void _TGRSctrl::moveStep(picojson::object &jo)
+	void _TGRSctrl::move(picojson::object &jo)
 	{
-		IF_(!jo["pTargetX"].is<double>());
-		m_vPtarget.x = constrain<float>(jo["pTargetX"].get<double>(), m_vRx.x, m_vRx.y);
+		IF_(!jo["axis"].is<string>());
+		string axis = jo["axis"].get<string>();
 
-		IF_(!jo["pTargetY"].is<double>());
-		m_vPtarget.y = constrain<float>(jo["pTargetY"].get<double>(), m_vRy.x, m_vRy.y);
+		IF_(!jo["direction"].is<double>());
+		float direction = jo["direction"].get<double>();
+
+		IF_(!jo["speed"].is<double>());
+		float speed = jo["speed"].get<double>();
+
+		IF_(!jo["pTarget"].is<double>());
+		float pTarget = jo["pTarget"].get<double>();
+
+		if (axis == "x")
+		{
+			m_vSpeed.x = direction * speed;
+			m_vPtarget.x = pTarget;
+		}
+		else if (axis == "y")
+		{
+			m_vSpeed.y = direction * speed;
+			m_vPtarget.y = pTarget;
+		}
 	}
 
-	void _TGRSctrl::moveStop(picojson::object &jo)
+	void _TGRSctrl::stop(picojson::object &jo)
 	{
-		IF_(!jo["bMove"].is<double>());
-		m_bMove = jo["pTargetX"].get<double>();
+		m_vPtarget.set(-1);
+		m_vSpeed.set(0);
 	}
 
 	void _TGRSctrl::console(void *pConsole)
@@ -214,9 +231,8 @@ namespace kai
 		_Console *pC = (_Console *)pConsole;
 		pC->addMsg("vPos = (" + f2str(m_vPos.x) + ", " + f2str(m_vPos.y) + ")");
 		pC->addMsg("vPtarget = (" + f2str(m_vPtarget.x) + ", " + f2str(m_vPtarget.y) + ")");
-		pC->addMsg("motSpd = " + f2str(m_motSpd) + ")");
-		pC->addMsg("vRx = (" + f2str(m_vRx.x) + ", " + f2str(m_vRx.y) + ")");
-		pC->addMsg("vRy = (" + f2str(m_vRy.x) + ", " + f2str(m_vRy.y) + ")");
+		pC->addMsg("vSpeed = (" + f2str(m_vSpeed.x) + ", " + f2str(m_vSpeed.y) + ")");
+		pC->addMsg("posDZ = " + f2str(m_posDZ) + ")");
 	}
 
 }

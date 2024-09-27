@@ -6,18 +6,114 @@ window.onload = function () {
     var strEOJ = "EOJ";
     var dV = 0.1;
 
-    $('#btnStartScan').onclick = function (e) {
+    $('#btnStop').onclick = function (e) {
         var cmd = {
-            cmd: 'scanStart',
+            cmd: 'stop',
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
         wsSocket.send(cmdStr);
     };
 
-    $('#btnStopScan').onclick = function (e) {
+    $('#btnXinc').onclick = function (e) {
         var cmd = {
-            cmd: 'scanStop',
+            cmd: 'move',
+            axis: 'x',
+            direction: 1,
+            speed: $('#iptXspeed').value,
+            pTarget: -1,
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnXdec').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'x',
+            direction: -1,
+            speed: $('#iptXspeed').value,
+            pTarget: -1,
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnXincStep').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'x',
+            direction: 1,
+            speed: parseFloat($('#iptXspeed').value),
+            pTarget: parseFloat($('#Xpos').value) + parseFloat($('#iptXstep').value),
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnXdecStep').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'x',
+            direction: -1,
+            speed: parseFloat($('#iptXspeed').value),
+            pTarget: parseFloat($('#Xpos').value) - parseFloat($('#iptXstep').value),
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+
+    $('#btnYinc').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'y',
+            direction: 1,
+            speed: $('#iptYspeed').value,
+            pTarget: -1,
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnYdec').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'y',
+            direction: -1,
+            speed: $('#iptYspeed').value,
+            pTarget: -1,
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnYincStep').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'y',
+            direction: 1,
+            speed: parseFloat($('#iptYspeed').value),
+            pTarget: parseFloat($('#Ypos').value) + parseFloat($('#iptYstep').value),
+        };
+
+        cmdStr = JSON.stringify(cmd) + strEOJ;
+        wsSocket.send(cmdStr);
+    };
+
+    $('#btnYdecStep').onclick = function (e) {
+        var cmd = {
+            cmd: 'move',
+            axis: 'y',
+            direction: -1,
+            speed: parseFloat($('#iptYspeed').value),
+            pTarget: parseFloat($('#Ypos').value) - parseFloat($('#iptYstep').value),
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
@@ -27,14 +123,8 @@ window.onload = function () {
 };
 
 function cmdHandler(jCmd) {
-    if (jCmd.cmd == "getParam") {
-        $('#Fx').value = jCmd.Fx;
-        $('#Fy').value = jCmd.Fy;
-        $('#Gamma').value = jCmd.Gamma;
-        $('#Cx').value = jCmd.Cx;
-        $('#Cy').value = jCmd.Cy;
-        $('#OfsX').value = jCmd.OfsX;
-        $('#OfsY').value = jCmd.OfsY;
-        $('#OfsZ').value = jCmd.OfsZ;
+    if (jCmd.cmd == "updatePos") {
+        $('#Xpos').value = jCmd.pX;
+        $('#Ypos').value = jCmd.pY;
     }
 }

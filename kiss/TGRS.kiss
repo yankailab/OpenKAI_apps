@@ -18,7 +18,7 @@
 }
 
 {
-	"name":"serial",
+	"name":"serial1",
 	"class":"_SerialPort",
 	"bON":1,
     {
@@ -30,12 +30,12 @@
         "FPS":30,
     }
 	"bLog":1,
-	"port":"/dev/ttyAMA1",
+	"port":"/dev/ttyACM0",
 	"baud":921600,
 }
 
 {
-	"name":"TOFsense",
+	"name":"TOFsense1",
 	"class":"_TOFsense",
 	"bON":1,
     {
@@ -43,11 +43,11 @@
         "FPS":30,
     }
 	"bLog":1,
-	"_IObase":"serial",
+	"_IObase":"serial1",
 }
 
 {
-	"name":"serial",
+	"name":"serial2",
 	"class":"_SerialPort",
 	"bON":1,
     {
@@ -59,12 +59,12 @@
         "FPS":30,
     }
 	"bLog":1,
-	"port":"/dev/ttyAMA1",
+	"port":"/dev/ttyACM1",
 	"baud":921600,
 }
 
 {
-	"name":"TOFsense",
+	"name":"TOFsense2",
 	"class":"_TOFsense",
 	"bON":1,
     {
@@ -72,12 +72,12 @@
         "FPS":30,
     }
 	"bLog":1,
-	"_IObase":"serial",
+	"_IObase":"serial2",
 }
 
 
 {
-	"name":"serial",
+	"name":"serial3",
 	"class":"_SerialPort",
 	"bON":1,
 	"bLog":0,
@@ -90,63 +90,38 @@
 		"FPS":10,
 		"/vRunThread":["DDSM.threadR"],
 	}
-	"/port":"/dev/ttyUSB0",
-	"port":"/dev/ttyAMA1",
+	"port":"/dev/ttyACM2",
 	"baud":115200,
 }
 
 {
-	"name":"DDSM",
+	"name":"DDSM1",
 	"class":"_DDSM",
 	"bON":1,
-	"bLog":0,
     {
 		"name":"thread",
-		"FPS":5,
+		"FPS":10,
 	}
     {
 		"name":"threadR",
 		"FPS":1,
 	}
-	"_IObase":"serial",
+	"bLog":1,
+	"_IObase":"serial3",
+	"ID":1,
 	"iMode":2,
-	{
-		"name":"axis",
-		{
-			"name":"motor",
-			"sOrigin":0,
-			"sTarget":0,
-			"sRange":[-100,100],
-			"sErr":1,
-		}
-	}
-}
 
-{
-	"name":"DDSM",
-	"class":"_DDSM",
-	"bON":1,
-	"bLog":0,
-    {
-		"name":"thread",
-		"FPS":5,
-	}
-    {
-		"name":"threadR",
-		"FPS":1,
-	}
-	"_IObase":"serial",
-	"iMode":2,
-	{
-		"name":"axis",
-		{
-			"name":"motor",
-			"sOrigin":0,
-			"sTarget":0,
-			"sRange":[-100,100],
-			"sErr":1,
-		}
-	}
+	"tCmdTimeout":0,
+	"mode":1,
+	"bPower":1,
+	"setPower":1,
+	"setID":0,
+	"setMode":1,
+
+	"sDir":1,
+	"s":0,
+	"sTarget":0,
+	"sRange":[0,300],
 }
 
 
@@ -181,11 +156,15 @@
 	"msgFinishSend":"",
 	"msgFinishRecv":"EOJ",
 
+	"_DistSensorBaseX":"TOFsense1",
+	"_DistSensorBaseY":"TOFsense2",
+	"vDDSMx":["DDSM1"],
+	"vDDSMy":[],
+
 	"posDZ":0.01,
 	"vPtarget":[0.1, 0.1],
 	"motSpd":10,
 	"vRx":[0.1, 2.0],
 	"vRy":[0.1, 2.0],
 	"bMove":0,
-
 }

@@ -28,8 +28,8 @@ namespace kai
 		int check(void);
 		void console(void *pConsole);
 
-		void moveStep(picojson::object& jo);
-		void moveStop(picojson::object& jo);
+		void move(picojson::object& jo);
+		void stop(picojson::object& jo);
 
 	private:
 		void setMotSpdX(float s);
@@ -57,17 +57,10 @@ namespace kai
 		vector<_DDSM*> m_vMotX;
 		vector<_DDSM*> m_vMotY;
 
-		bool m_bMove;
-
 		vFloat2 m_vPos;
 		vFloat2 m_vPtarget;
-		float m_posDZ;	// pos dead zone
-		float m_motSpd;
-
-		// region
-		vFloat2 m_vRx;
-		vFloat2 m_vRy;
-
+		vFloat2 m_vSpeed;
+		float m_posDZ;		// pos dead zone
 	};
 
 }

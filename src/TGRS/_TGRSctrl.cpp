@@ -16,8 +16,10 @@ namespace kai
 		m_pDSy = nullptr;
 
 		m_vPos.clear();
-		m_vPtarget.clear();
-		m_vSpeed.set(10);
+		m_vPtarget.set(-1);
+		m_vSpeed.set(0);
+		m_vRx.set(0, 1);
+		m_vRy.set(0, 1);
 		m_posDZ = 0.01;
 	}
 
@@ -30,9 +32,22 @@ namespace kai
 		CHECK_(this->_JSONbase::init(pKiss));
 		Kiss *pK = (Kiss *)pKiss;
 
-		pK->v("posDZ", &m_posDZ);
 		pK->v("vPtarget", &m_vPtarget);
 		pK->v("vSpeed", &m_vSpeed);
+		pK->v("vRx", &m_vRx);
+		pK->v("vRy", &m_vRy);
+		pK->v("posDZ", &m_posDZ);
+
+		int nFl;
+		nFl = 5;
+		pK->v("nMedFilter", &nFl);
+		m_flMedX.init(nFl);
+		m_flMedY.init(nFl);
+
+		nFl = 3;
+		pK->v("nAvrFilter", &nFl);
+		m_flAvrX.init(nFl);
+		m_flAvrY.init(nFl);
 
 		return OK_OK;
 	}
@@ -109,6 +124,7 @@ namespace kai
 			m_pT->autoFPSfrom();
 
 			updateTGRS();
+			sendUpdate();
 
 			m_pT->autoFPSto();
 		}
@@ -116,7 +132,21 @@ namespace kai
 
 	void _TGRSctrl::updateTGRS(void)
 	{
-		IF_(check() < 0);
+		IF_(check() != OK_OK);
+
+		float pX = m_pDSx->d(0);
+		float pY = m_pDSy->d(0);
+
+		if (m_flAvrX.update(m_flMedX.update(&pX)))
+			m_vPos.x = m_flAvrX.v();
+		else
+			m_vPos.x = pX;
+
+		if (m_flAvrY.update(m_flMedY.update(&pY)))
+			m_vPos.y = m_flAvrY.v();
+		else
+			m_vPos.y = pY;
+
 
 		// X axis
 		if (m_vPtarget.x > 0)
@@ -137,7 +167,9 @@ namespace kai
 		{
 			float dP = m_vPtarget.y - m_vPos.y;
 			if (abs(dP) > m_posDZ)
+			{
 				setMotSpdY(m_vSpeed.y * sign(dP));
+			}
 			else
 				setMotSpdY(0);
 		}
@@ -145,6 +177,17 @@ namespace kai
 		{
 			setMotSpdY(m_vSpeed.y);
 		}
+	}
+
+	void _TGRSctrl::sendUpdate(void)
+	{
+		IF_(check() != OK_OK);
+
+		object r;
+		JO(r, "cmd", "updatePos");
+		JO(r, "pX", m_vPos.x);
+		JO(r, "pY", m_vPos.y);
+		sendMsg(r);
 	}
 
 	void _TGRSctrl::setMotSpdX(float s)
@@ -208,11 +251,13 @@ namespace kai
 		{
 			m_vSpeed.x = direction * speed;
 			m_vPtarget.x = pTarget;
+			//			m_vPtarget.x = constrain<float>(pTarget, m_vRx.x, m_vRx.y);
 		}
 		else if (axis == "y")
 		{
 			m_vSpeed.y = direction * speed;
 			m_vPtarget.y = pTarget;
+			//			m_vPtarget.y = constrain<float>(pTarget, m_vRy.x, m_vRy.y);
 		}
 	}
 
@@ -232,7 +277,7 @@ namespace kai
 		pC->addMsg("vPos = (" + f2str(m_vPos.x) + ", " + f2str(m_vPos.y) + ")");
 		pC->addMsg("vPtarget = (" + f2str(m_vPtarget.x) + ", " + f2str(m_vPtarget.y) + ")");
 		pC->addMsg("vSpeed = (" + f2str(m_vSpeed.x) + ", " + f2str(m_vSpeed.y) + ")");
-		pC->addMsg("posDZ = " + f2str(m_posDZ) + ")");
+		pC->addMsg("posDZ = " + f2str(m_posDZ));
 	}
 
 }

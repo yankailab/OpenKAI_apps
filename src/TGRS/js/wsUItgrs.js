@@ -15,12 +15,13 @@ window.onload = function () {
         wsSocket.send(cmdStr);
     };
 
+
     $('#btnXinc').onclick = function (e) {
         var cmd = {
             cmd: 'move',
             axis: 'x',
             direction: 1,
-            speed: $('#iptXspeed').value,
+            speed: parseFloat($('#iptXspeed').value),
             pTarget: -1,
         };
 
@@ -33,7 +34,7 @@ window.onload = function () {
             cmd: 'move',
             axis: 'x',
             direction: -1,
-            speed: $('#iptXspeed').value,
+            speed: parseFloat($('#iptXspeed').value),
             pTarget: -1,
         };
 
@@ -41,39 +42,26 @@ window.onload = function () {
         wsSocket.send(cmdStr);
     };
 
-    $('#btnXincStep').onclick = function (e) {
+    $('#btnXgoto').onclick = function (e) {
         var cmd = {
             cmd: 'move',
             axis: 'x',
             direction: 1,
             speed: parseFloat($('#iptXspeed').value),
-            pTarget: parseFloat($('#Xpos').value) + parseFloat($('#iptXstep').value),
+            pTarget: parseFloat($('#iptXgoto').value),
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;
         wsSocket.send(cmdStr);
     };
-
-    $('#btnXdecStep').onclick = function (e) {
-        var cmd = {
-            cmd: 'move',
-            axis: 'x',
-            direction: -1,
-            speed: parseFloat($('#iptXspeed').value),
-            pTarget: parseFloat($('#Xpos').value) - parseFloat($('#iptXstep').value),
-        };
-
-        cmdStr = JSON.stringify(cmd) + strEOJ;
-        wsSocket.send(cmdStr);
-    };
-
+    
 
     $('#btnYinc').onclick = function (e) {
         var cmd = {
             cmd: 'move',
             axis: 'y',
             direction: 1,
-            speed: $('#iptYspeed').value,
+            speed: parseFloat($('#iptYspeed').value),
             pTarget: -1,
         };
 
@@ -86,7 +74,7 @@ window.onload = function () {
             cmd: 'move',
             axis: 'y',
             direction: -1,
-            speed: $('#iptYspeed').value,
+            speed: parseFloat($('#iptYspeed').value),
             pTarget: -1,
         };
 
@@ -94,26 +82,13 @@ window.onload = function () {
         wsSocket.send(cmdStr);
     };
 
-    $('#btnYincStep').onclick = function (e) {
+    $('#btnYgoto').onclick = function (e) {
         var cmd = {
             cmd: 'move',
             axis: 'y',
             direction: 1,
             speed: parseFloat($('#iptYspeed').value),
-            pTarget: parseFloat($('#Ypos').value) + parseFloat($('#iptYstep').value),
-        };
-
-        cmdStr = JSON.stringify(cmd) + strEOJ;
-        wsSocket.send(cmdStr);
-    };
-
-    $('#btnYdecStep').onclick = function (e) {
-        var cmd = {
-            cmd: 'move',
-            axis: 'y',
-            direction: -1,
-            speed: parseFloat($('#iptYspeed').value),
-            pTarget: parseFloat($('#Ypos').value) - parseFloat($('#iptYstep').value),
+            pTarget: parseFloat($('#iptYgoto').value),
         };
 
         cmdStr = JSON.stringify(cmd) + strEOJ;

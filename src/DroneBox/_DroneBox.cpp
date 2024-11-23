@@ -22,7 +22,7 @@ namespace kai
     {
         CHECK_(this->_ModuleBase::init(pKiss));
         Kiss *pK = (Kiss *)pKiss;
-		
+
         pK->v("ID", &m_ID);
         pK->v("vPos", &m_vPos);
         pK->v("iSlave", &m_iSlave);

@@ -43,8 +43,8 @@ namespace kai
         string n;
 
         n = "";
-        pK->v("_AP_base", &n);
-        m_pAP = (_AP_base *)(pK->findModule(n));
+        pK->v("_APmavlink_base", &n);
+        m_pAP = (_APmavlink_base *)(pK->findModule(n));
         NULL__(m_pAP, OK_ERR_NOT_FOUND);
 
         n = "";

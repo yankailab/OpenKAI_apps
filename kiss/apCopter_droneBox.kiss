@@ -14,7 +14,7 @@
 		"name":"thread",
 		"FPS":10,
 	}
-	"vBASE":["cam","state","arUco","TOFsense","/serialAP","apBase","apLT","/apVideo","/uploader"],
+	"vBASE":["cam","state","arUco","TOFsense","serialAP","apMavlink","apBase","apDroneBox","apDroneBoxJSON","apLT","/apVideo","/uploader"],
 }
 
 {
@@ -98,61 +98,6 @@
 }
 
 {
-	"name":"apDroneBox",
-	"class":"_AP_droneBox",
-	"bON":1,
-    {
-		"name":"thread",
-		"FPS":10,
-	}
-	"bLog":1,
-	"_AP_base":"apBase",
-	"_StateControl":"state",
-	"_AP_landingTarget":"apLT",
-	"altTakeoff":22.0,
-	"altLand":20.0,
-	"bAutoArm":0,
-	"gpsToutSec":100,
-	"gpsHaccMax":100,
-}
-
-{
-	"name":"udp",
-	"class":"_UDP",
-	"bON":1,
-    {
-		"name":"thread",
-		"FPS":30,
-	}
-    {
-		"name":"threadR",
-		"FPS":30,
-		"vRunThread":["dronBoxJson.threadR"],
-	}
-	"bLog":0,
-	"addr":"192.168.1.250",
-	"/addr":"127.0.0.1",
-	"port":20000,
-}
-
-{
-	"name":"dronBoxJson",
-	"class":"_AP_droneBoxJSON",
-	"bON":1,
-    {
-		"name":"thread",
-		"FPS":2,
-	}
-    {
-		"name":"threadR",
-		"FPS":30,
-	}
-	"bLog":1,
-	"_AP_droneBox":"apDroneBox",
-	"_IObase":"udp",
-}
-
-{
 	"name":"/serialAP",
 	"class":"_UDP",
 	"bON":0,
@@ -161,14 +106,10 @@
 		"name":"thread",
 		"FPS":30,
 	}
-    {
-		"name":"threadR",
-		"FPS":30,
-		"vRunThread":["apMavlink.thread"],
-	}
 	"/addr":"127.0.0.1",
 	"port":14550,
 }
+
 
 {
 	"name":"serialAP",
@@ -176,16 +117,14 @@
 	"bON":1,
     {
 		"name":"thread",
-		"FPS":30,
-	}
-    {
-		"name":"threadR",
 		"FPS":10,
-		"vRunThread":["apMavlink.thread"],
 	}
-	"/port":"/dev/ttyAMA0",
-	"port":"/dev/ttyS0",
-	"/port":"/dev/ttyUSB0",
+	"nPacket":1024,
+	"nPbuffer":512,
+	"//port":"/dev/ttyAMA0",
+	"/port":"/dev/ttyS0",
+	"port":"/dev/ttyACM0",
+	"/port":"/dev/ttyTHS1",
 	"baud":115200,
 }
 
@@ -195,16 +134,17 @@
 	"bON":1,
     {
 		"name":"thread",
-		"FPS":30,
+		"FPS":10,
 	}
 	"bLog":0,
 	"_IObase":"serialAP",
 	"mySystemID":200,
+	"iMavComm":0,
 }
 
 {
 	"name":"apBase",
-	"class":"_AP_base",
+	"class":"_APmavlink_base",
 	"bON":1,
     {
 		"name":"thread",
@@ -212,13 +152,13 @@
 	}
 	"_StateControl":"state",
 	"_Mavlink":"apMavlink",
+	"apType":0,
 	"ieSendHB":1,
 	"ieSendMsgInt":1,
-	"apType":0,
-	
+
 	{
 		"name":"mavMsgInt",
-		
+
 		{
 			"name":"heartbeat",
 			"id":0,
@@ -227,7 +167,7 @@
 		{
 			"name":"attitude",
 			"id":30,
-			"tInt":0.5,
+			"tInt":1,
 		}
 		{
 			"name":"gpsRawINT",
@@ -254,8 +194,71 @@
 			"id":147,
 			"tInt":10,
 		}
+		{
+			"name":"missionCurrent",
+			"id":42,
+			"tInt":1,
+		}
 	}
 }
+
+{
+	"name":"apDroneBox",
+	"class":"_AP_droneBox",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":10,
+	}
+	"bLog":1,
+	"_APmavlink_base":"apBase",
+	"_StateControl":"state",
+	"/_AP_landingTarget":"apLT",
+	"altTakeoff":22.0,
+	"altLand":20.0,
+	"bAutoArm":0,
+	"gpsToutSec":100,
+	"gpsHaccMax":100,
+}
+
+{
+	"name":"udp",
+	"class":"_UDP",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":30,
+	}
+	"bLog":0,
+	"nPacket":1024,
+	"nPbuffer":512,
+	"addr":"192.168.1.250",
+	"/addr":"127.0.0.1",
+	"port":20000,
+	"bServer":0,
+	"bW2R":1,
+	"bWbroadcast":0,
+}
+
+{
+	"name":"apDroneBoxJSON",
+	"class":"_AP_droneBoxJSON",
+	"bON":1,
+    {
+		"name":"thread",
+		"FPS":2,
+	}
+    {
+		"name":"threadR",
+		"FPS":10,
+	}
+	"bLog":1,
+	"_AP_droneBox":"apDroneBox",
+	"_IObase":"udp",
+}
+
+
+
 
 {
 	"name":"apHttpJson",
@@ -313,7 +316,7 @@
 {
 	"name":"cam",
 	"class":"_GStreamer",
-	"bON":1,
+	"bON":0,
     {
 		"name":"thread",
 		"FPS":30,
@@ -326,7 +329,7 @@
 {
 	"name":"arUco",
 	"class":"_ArUco",
-	"bON":1,
+	"bON":0,
     {
 		"name":"thread",
 		"FPS":30,
@@ -339,7 +342,7 @@
 {
 	"name":"univTag",
 	"class":"_Universe",
-	"bON":1,
+	"bON":0,
     {
 		"name":"thread",
 		"FPS":10,
@@ -349,7 +352,7 @@
 {
 	"name":"serialTOF",
 	"class":"_SerialPort",
-	"bON":1,
+	"bON":0,
     {
         "name":"thread",
         "FPS":30,
@@ -366,7 +369,7 @@
 {
 	"name":"TOFsense",
 	"class":"_TOFsense",
-	"bON":1,
+	"bON":0,
     {
         "name":"thread",
         "FPS":30,
@@ -383,7 +386,7 @@
 		"name":"thread",
 		"FPS":10,
 	}
-	"bON":1,
+	"bON":0,
 	"bLog":1,
 	"_StateControl":"state",
 	"_AP_base":"apBase",
@@ -398,7 +401,7 @@
 	"hTouchdown":1.0,
 	"kP":0.125,
 	"defaultDtgt":2.0,
-	
+
 	{
 		"name":"tags",
 		{
@@ -421,5 +424,5 @@
 			"id":3,
 			"priority":0,
 		}
-	}	
+	}
 }

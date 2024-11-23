@@ -13,7 +13,6 @@ namespace kai
 
     _AP_droneBoxJSON::~_AP_droneBoxJSON()
     {
-        DEL(m_pTr);
     }
 
     int _AP_droneBoxJSON::init(void *pKiss)
@@ -27,7 +26,6 @@ namespace kai
 	int _AP_droneBoxJSON::link(void)
 	{
 		CHECK_(this->_JSONbase::link());
-		CHECK_(m_pTr->link());
 
 		Kiss *pK = (Kiss *)m_pKiss;
 
@@ -59,21 +57,6 @@ namespace kai
     {
         while (m_pT->bAlive())
         {
-            if (!m_pIO)
-            {
-                m_pT->sleepT(SEC_2_USEC);
-                continue;
-            }
-
-            if (!m_pIO->bOpen())
-            {
-                if (!m_pIO->open())
-                {
-                    m_pT->sleepT(SEC_2_USEC);
-                    continue;
-                }
-            }
-
             m_pT->autoFPSfrom();
 
             send();
@@ -137,21 +120,19 @@ namespace kai
 
     void _AP_droneBoxJSON::updateR(void)
     {
+        string strR = "";
+
         while (m_pTr->bAlive())
         {
-            m_pTr->autoFPSfrom();
+            IF_CONT(!recvJson(&strR));
 
-            if (recv())
-            {
-                handleMsg(m_strB);
-                m_strB.clear();
-            }
-
-            m_pTr->autoFPSto();
+            handleJson(strR);
+            strR.clear();
+			m_nCMDrecv++;
         }
     }
 
-    void _AP_droneBoxJSON::handleMsg(string &str)
+    void _AP_droneBoxJSON::handleJson(const string &str)
     {
         value json;
         IF_(!str2JSON(str, &json));

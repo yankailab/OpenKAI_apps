@@ -56,21 +56,6 @@ namespace kai
     {
         while (m_pT->bAlive())
         {
-            if (!m_pIO)
-            {
-                m_pT->sleepT(SEC_2_USEC);
-                continue;
-            }
-
-            if (!m_pIO->bOpen())
-            {
-                if (!m_pIO->open())
-                {
-                    m_pT->sleepT(SEC_2_USEC);
-                    continue;
-                }
-            }
-
             m_pT->autoFPSfrom();
 
             send();
@@ -116,21 +101,19 @@ namespace kai
 
     void _DroneBoxJSON::updateR(void)
     {
+        string strR = "";
+
         while (m_pTr->bAlive())
         {
-            m_pTr->autoFPSfrom();
+            IF_CONT(!recvJson(&strR));
 
-            if (recv())
-            {
-                handleMsg(m_strB);
-                m_strB.clear();
-            }
-
-            m_pTr->autoFPSto();
+            handleJson(strR);
+            strR.clear();
+			m_nCMDrecv++;
         }
     }
 
-    void _DroneBoxJSON::handleMsg(string &str)
+    void _DroneBoxJSON::handleJson(const string &str)
     {
         value json;
         IF_(!str2JSON(str, &json));

@@ -1,7 +1,7 @@
-#ifndef OpenKAI_src_Application_DroneBox__AP_droneBoxJSON_H_
-#define OpenKAI_src_Application_DroneBox__AP_droneBoxJSON_H_
+#ifndef OpenKAI_src_DroneBox__AP_droneBoxJSON_H_
+#define OpenKAI_src_DroneBox__AP_droneBoxJSON_H_
 
-#include "../../Protocol/_JSONbase.h"
+#include <OpenKAI/Protocol/_JSONbase.h>
 #include "_AP_droneBox.h"
 
 namespace kai
@@ -23,7 +23,7 @@ namespace kai
 		void send(void);
 
 		//msg handlers
-		void handleMsg(string &str);
+		void handleJson(const string &str);
 		void heartbeat(picojson::object &o);
 		void stat(picojson::object &o);
 		void ack(picojson::object &o);

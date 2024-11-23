@@ -1,8 +1,8 @@
-#ifndef OpenKAI_src_Application_DroneBox__DroneBox_H_
-#define OpenKAI_src_Application_DroneBox__DroneBox_H_
+#ifndef OpenKAI_src_DroneBox__DroneBox_H_
+#define OpenKAI_src_DroneBox__DroneBox_H_
 
-#include "../../Protocol/_Modbus.h"
-#include "../../State/_StateControl.h"
+#include <OpenKAI/Protocol/_Modbus.h>
+#include <OpenKAI/State/_StateControl.h>
 
 namespace kai
 {

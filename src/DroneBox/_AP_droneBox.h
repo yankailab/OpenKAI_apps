@@ -1,9 +1,8 @@
-#ifndef OpenKAI_src_Application_DroneBox__AP_droneBox_H_
-#define OpenKAI_src_Application_DroneBox__AP_droneBox_H_
+#ifndef OpenKAI_src_DroneBox__AP_droneBox_H_
+#define OpenKAI_src_DroneBox__AP_droneBox_H_
 
-//#include "../../Autopilot/ArduPilot/_AP_land.h"
-#include "../../Autopilot/ArduPilot/_AP_landingTarget.h"
-#include "../../State/_StateControl.h"
+#include <OpenKAI/Autopilot/APmavlink/_APmavlink_base.h>
+#include <OpenKAI/State/_StateControl.h>
 
 namespace kai
 {
@@ -35,12 +34,12 @@ namespace kai
 
 	protected:
 		_StateControl* m_pSC;
-		_AP_base *m_pAP;
+		_APmavlink_base *m_pAP;
 
 		int m_gpsToutSec;
 		int m_gpsHaccMax;
 		uint64_t m_tGPSmeasureStart;
-		
+
 		bool m_bAutoArm;
 		float m_altTakeoff;
 		float m_altLand;

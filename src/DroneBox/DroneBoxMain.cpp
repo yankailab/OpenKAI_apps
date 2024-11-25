@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
 
 	// add user app modules
 	_DroneBox *pDroneBox = new _DroneBox();
-	if (g_pOK->addModule(pDroneBox, "DroneBox") != OK_OK)
+	if (g_pOK->addModule(pDroneBox, "droneBox") != OK_OK)
 		return 1;
 
 	_DroneBoxJSON *pDroneBoxJson = new _DroneBoxJSON();
-	if (g_pOK->addModule(pDroneBoxJson, "DroneBoxJSON") != OK_OK)
+	if (g_pOK->addModule(pDroneBoxJson, "droneBoxJSON") != OK_OK)
 		return 1;
 
 	// init all modules altogether

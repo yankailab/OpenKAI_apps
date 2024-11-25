@@ -81,7 +81,7 @@ namespace kai
         {
             JO(o, "cmd", "stat");
             JO(o, "stat", "STANDBY");
-            sendMsg(o);
+            sendJson(o);
             return;
         }
 
@@ -89,7 +89,7 @@ namespace kai
         {
             JO(o, "cmd", "req");
             JO(o, "do", "takeoff");
-            sendMsg(o);
+            sendJson(o);
             return;
         }
 
@@ -97,7 +97,7 @@ namespace kai
         {
             JO(o, "cmd", "stat");
             JO(o, "stat", "AIRBORNE");
-            sendMsg(o);
+            sendJson(o);
             return;
         }
 
@@ -105,7 +105,7 @@ namespace kai
         {
             JO(o, "cmd", "req");
             JO(o, "do", "landing");
-            sendMsg(o);
+            sendJson(o);
             return;
         }
 
@@ -113,7 +113,7 @@ namespace kai
         {
             JO(o, "cmd", "stat");
             JO(o, "stat", "LANDED");
-            sendMsg(o);
+            sendJson(o);
             return;
         }
     }

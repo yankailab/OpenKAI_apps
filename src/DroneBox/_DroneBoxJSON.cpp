@@ -87,7 +87,7 @@ namespace kai
         JO(o, "lat", lf2str(vP.x, 10));
         JO(o, "lng", lf2str(vP.y, 10));
 
-        sendMsg(o);
+        sendJson(o);
     }
 
     void _DroneBoxJSON::sendStat(void)
@@ -96,7 +96,7 @@ namespace kai
         JO(o, "id", (double)m_pDB->getID());
         JO(o, "cmd", "stat");
         JO(o, "stat", m_pDB->getState());
-        sendMsg(o);
+        sendJson(o);
     }
 
     void _DroneBoxJSON::updateR(void)
@@ -190,7 +190,7 @@ namespace kai
             }
         }
 
-        sendMsg(jo);
+        sendJson(jo);
     }
 
     void _DroneBoxJSON::console(void *pConsole)

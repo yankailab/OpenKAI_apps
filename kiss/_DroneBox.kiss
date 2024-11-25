@@ -79,7 +79,7 @@
 	"bON":1,
     {
 		"name":"thread",
-		"FPS":30,
+		"FPS":1,
 	}
 	"bLog":0,
 	"port":"/dev/ttyS0",
@@ -110,30 +110,32 @@
 	"bON":1,
     {
 		"name":"thread",
-		"FPS":30,
+		"FPS":1,
+	}
+	"bLog":0,
+	"nPacket":1024,
+	"nPbuffer":512,
+	"port":20000,
+	"bServer":1,
+	"bW2R":1,
+	"bWbroadcast":0,
+}
+
+{
+	"name":"droneBoxJSON",
+	"class":"_DroneBoxJSON",
+	"bON":1,
+	"bLog":1,
+    {
+		"name":"thread",
+		"FPS":1,
 	}
     {
 		"name":"threadR",
 		"FPS":1,
-		"vRunThread":["dronBoxJson.threadR"],
 	}
-	"port":20000,
-	"nFIFO":12800,
-}
-
-{
-	"name":"dronBoxJson",
-	"class":"_DroneBoxJSON",
-	"bON":1,
-    {
-		"name":"thread",
-		"FPS":2,
-	}
-    {
-		"name":"threadR",
-		"FPS":30,
-	}
-	"bLog":1,
+	"msgFinishSend":"EOJ",
+	"msgFinishRecv":"EOJ",
 	"_DroneBox":"droneBox",
 	"_IObase":"udp",
 }

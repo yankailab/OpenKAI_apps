@@ -209,10 +209,10 @@
 	"_Mavlink":"apMavlink",
 	"freqSendHeartbeat":1,
 	"apType":0,
-	
+
 	{
 		"name":"mavMsgInt",
-		
+
 		{
 			"name":"heartbeat",
 			"id":0,
@@ -435,7 +435,7 @@
 			"vKdist":[0.2, 2.0],
 		}
 	}
-	
+
 	{
 		"name":"mount",
 		"bEnable":0,

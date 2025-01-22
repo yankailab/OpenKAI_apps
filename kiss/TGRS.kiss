@@ -3,7 +3,7 @@
 	"class":"Startup",
 	"appName":"TGRS",
 	"bLog":1,
-	"bStdErr":0,
+	"bStdErr":1,
 }
 
 {
@@ -14,159 +14,88 @@
 		"name":"thread",
 		"FPS":30,
 	}
-	"vBASE":["TGRSctrl", "TOFsense2", "TOFsense3", "DDSM1", "DDSM3"],
+	"vBASE":["modbus", "om", "wsServer", "TGRSctrl"],
 }
 
 {
-	"name":"serial2",
-	"class":"_SerialPort",
-	"bON":1,
-    {
-        "name":"thread",
-        "FPS":10,
-    }
-    {
-        "name":"threadR",
-        "FPS":30,
-    }
-	"bLog":1,
-	"port":"/dev/ttyUSB1",
-	"baud":921600,
-}
-
-{
-	"name":"TOFsense2",
-	"class":"_TOFsense",
-	"bON":1,
-    {
-        "name":"thread",
-        "FPS":20,
-    }
-	"bLog":1,
-	"_IObase":"serial2",
-}
-
-{
-	"name":"serial3",
-	"class":"_SerialPort",
-	"bON":1,
-    {
-        "name":"thread",
-        "FPS":10,
-    }
-    {
-        "name":"threadR",
-        "FPS":30,
-    }
-	"bLog":1,
-	"port":"/dev/ttyUSB2",
-	"baud":921600,
-}
-
-{
-	"name":"TOFsense3",
-	"class":"_TOFsense",
-	"bON":1,
-    {
-        "name":"thread",
-        "FPS":20,
-    }
-	"bLog":1,
-	"_IObase":"serial3",
-}
-
-
-{
-	"name":"serial",
-	"class":"_SerialPort",
+	"name":"modbus",
+	"class":"_Modbus",
 	"bON":1,
 	"bLog":0,
     {
 		"name":"thread",
-		"FPS":30,
-	}
-    {
-		"name":"threadR",
 		"FPS":10,
-		"/vRunThread":["DDSM.threadR"],
 	}
+	"tOutSec":2,
 	"port":"/dev/ttyUSB0",
-	"baud":115200,
+	"baud":230400,
+	"parity":"E",
 }
 
 {
-	"name":"DDSM1",
-	"class":"_DDSM",
+	"name":"om",
+	"class":"_OrientalMotor",
 	"bON":1,
+	"bLog":0,
     {
 		"name":"thread",
-		"FPS":3,
+		"FPS":2,
 	}
-    {
-		"name":"threadR",
-		"FPS":1,
+
+	"_Modbus":"modbus",
+	"tIntSendCMD":100000,
+	"tIntReadStatus":100000,
+	"tIntCheckAlarm":100000,
+
+	{
+		"name":"channels",
+		{
+			"name":"X",
+			"ID":1,
+			"pOrigin":100,
+			"pTarget":0,
+			"pErr":10,
+			"pRange":[0,85000],
+			"sTarget":15000,
+			"sRange":[0,15000],
+			"aTarget":1000000,
+			"aRange":[1,1000000],
+			"bTarget":1000000,
+			"bRange":[1,1000000],
+			"cTarget":1000,
+			"cRange":[1,1000],
+		}
+		{
+			"name":"Y",
+			"ID":2,
+			"pOrigin":100,
+			"pTarget":0,
+			"pErr":10,
+			"pRange":[0,85000],
+			"sTarget":15000,
+			"sRange":[0,15000],
+			"aTarget":1000000,
+			"aRange":[1,1000000],
+			"bTarget":1000000,
+			"bRange":[1,1000000],
+			"cTarget":1000,
+			"cRange":[1,1000],
+		}
 	}
-	"bLog":1,
-	"_IObase":"serial",
-	"ID":1,
-	"iMode":2,
-
-	"tCmdTimeout":0,
-	"mode":1,
-	"bPower":1,
-	"setPower":1,
-	"setID":0,
-	"setMode":1,
-
-	"sDir":1,
-	"s":0,
-	"sTarget":0,
-	"sRange":[-5,5],
 }
 
 {
-	"name":"DDSM3",
-	"class":"_DDSM",
+	"name":"wsServer",
+	"class":"_WebSocketServer",
 	"bON":1,
-    {
-		"name":"thread",
-		"FPS":3,
-	}
-    {
-		"name":"threadR",
-		"FPS":1,
-	}
 	"bLog":1,
-	"_IObase":"serial",
-	"ID":3,
-	"iMode":2,
-
-	"tCmdTimeout":0,
-	"mode":1,
-	"bPower":1,
-	"setPower":1,
-	"setID":0,
-	"setMode":1,
-
-	"sDir":-1,
-	"s":0,
-	"sTarget":0,
-	"sRange":[-5,5],
-}
-
-
-{
-	"name":"ws",
-	"class":"_WebSocket",
-	"bON":1,
     {
 		"name":"thread",
 		"FPS":10,
 	}
-    {
-		"name":"threadR",
-		"FPS":10,
-	}
+	"host":"localhost",
+	"port":7890,
+	"tOutMs":10000,
 }
 
 {
@@ -182,21 +111,10 @@
 		"FPS":10,
 	}
 	"bLog":1,
-	"_IObase":"ws",
 	"msgFinishSend":"",
 	"msgFinishRecv":"EOJ",
-
-	"_DistSensorBaseX":"TOFsense2",
-	"_DistSensorBaseY":"TOFsense3",
-	"vDDSMx":["DDSM1"],
-	"vDDSMy":["DDSM3"],
-
-	"posDZ":0.01,
-	"vPtarget":[-1, -1],
+	"_WebSocketServer":"wsServer",
+	"_OrientalMotor":"om",
+	"vPtarget":[0, 0],
 	"vSpeed":[0, 0],
-	"vRx":[0.1, 2.0],
-	"vRy":[0.1, 2.0],
-	"bMove":0,
-	"nMedFilter":15,
-	"nAvrFilter":8,
 }

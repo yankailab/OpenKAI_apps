@@ -8,12 +8,10 @@
 #ifndef OpenKAI_src_TGRS__TGRSctrl_H_
 #define OpenKAI_src_TGRS__TGRSctrl_H_
 
-#include <OpenKAI/Utility/util.h>
+//#include <OpenKAI/Utility/util.h>
 #include <OpenKAI/Protocol/_JSONbase.h>
-#include <OpenKAI/Sensor/Distance/_DistSensorBase.h>
-#include <OpenKAI/Actuator/Motor/_DDSM.h>
-#include <OpenKAI/Filter/Median.h>
-#include <OpenKAI/Filter/Average.h>
+#include <OpenKAI/IO/_WebSocketServer.h>
+#include <OpenKAI/Actuator/_OrientalMotor.h>
 
 namespace kai
 {
@@ -33,11 +31,11 @@ namespace kai
 		void move(picojson::object& jo);
 		void stop(picojson::object& jo);
 
-	private:
-		void setMotSpdX(float s);
-		void setMotSpdY(float s);
+	protected:
+		bool recvJson(string* pStr);
+		void handleJson(const string &str);
 
-		void sendUpdate(void);
+	private:
 		void updateTGRS(void);
 		void update(void);
 		static void *getUpdate(void *This)
@@ -46,31 +44,13 @@ namespace kai
 			return NULL;
 		}
 
-		void handleMsg(const string &str);
-		void updateR(void);
-		static void *getUpdateR(void *This)
-		{
-			((_TGRSctrl *)This)->updateR();
-			return NULL;
-		}
-
 	private:
-		_DistSensorBase* m_pDSx;
-		_DistSensorBase* m_pDSy;
-		vector<_DDSM*> m_vMotX;
-		vector<_DDSM*> m_vMotY;
-
-		Median<float> m_flMedX;
-		Median<float> m_flMedY;
-		Average<float> m_flAvrX;
-		Average<float> m_flAvrY;
+		_WebSocketServer* m_pWSserver;
+		_OrientalMotor* m_pOM;
 
 		vFloat2 m_vPos;
 		vFloat2 m_vPtarget;
 		vFloat2 m_vSpeed;
-		vFloat2 m_vRx;
-		vFloat2 m_vRy;
-		float m_posDZ;		// pos dead zone
 	};
 
 }

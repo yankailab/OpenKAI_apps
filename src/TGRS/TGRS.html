@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
-  <title>fastLioScan</title>
+  <title>Radar Simulator</title>
   <!-- MDB icon -->
   <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
   <!-- Font Awesome -->
@@ -46,30 +46,27 @@
     <div class="text-center">
 
       <p style="color:red;font-weight: bold;">X axis</p>
-      Pos(m): <input id="Xpos" style="WIDTH: 100px; HEIGHT: 50px" value=0 disabled>
-      </br>
-      Speed(rpm): <input id="iptXspeed" style="WIDTH: 100px; HEIGHT: 50px" value=3>
+      Pos: <input id="iptXpos" style="WIDTH: 100px; HEIGHT: 50px" value=0 disabled>
+      Step: <input id="iptXstep" style="WIDTH: 100px; HEIGHT: 50px" value=1000>
+      Speed: <input id="iptXspeed" style="WIDTH: 100px; HEIGHT: 50px" value=1000>
       <button id="btnXinc" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Move +</button>
       <button id="btnXdec" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Move -</button>
-
-      Goto(m): <input id="iptXgoto" style="WIDTH: 100px; HEIGHT: 50px" value=0.2>
+      </br>
       <button id="btnXgoto" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Goto</button>
+      <input id="iptXgoto" style="WIDTH: 100px; HEIGHT: 50px" value=0>
       </br>
       </br>
 
       <p style="color:yellow;font-weight: bold;">Y axis</p>
-      Pos(m): <input id="Ypos" style="WIDTH: 100px; HEIGHT: 50px" value=0 disabled>
-      </br>
-      Speed(rpm): <input id="iptYspeed" style="WIDTH: 100px; HEIGHT: 50px" value=3>
+      Pos: <input id="iptYpos" style="WIDTH: 100px; HEIGHT: 50px" value=0 disabled>
+      Step: <input id="iptYstep" style="WIDTH: 100px; HEIGHT: 50px" value=1000>
+      Speed: <input id="iptYspeed" style="WIDTH: 100px; HEIGHT: 50px" value=1000>
       <button id="btnYinc" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Move +</button>
       <button id="btnYdec" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Move -</button>
+      </br>
 
-      Goto(m): <input id="iptYgoto" style="WIDTH: 100px; HEIGHT: 50px" value=0.2>
       <button id="btnYgoto" style="WIDTH: 100px; HEIGHT: 50px" type="button" class="btn btn-primary">Goto</button>
-      </br>
-      </br>
-
-      <button id="btnStop" style="WIDTH: 200px; HEIGHT: 50px" type="button" class="btn btn-secondary">Stop</button>
+      <input id="iptYgoto" style="WIDTH: 100px; HEIGHT: 50px" value=0>
       </br>
       </br>
 

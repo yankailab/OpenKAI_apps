@@ -32,6 +32,11 @@
 		"name":"state",
 		{
 			"bON":1,
+			"name":"RECOVER",
+			"class":"StateBase",
+		}
+		{
+			"bON":1,
 			"name":"STANDBY",
 			"class":"StateBase",
 		}

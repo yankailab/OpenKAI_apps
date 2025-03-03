@@ -9,7 +9,7 @@ namespace kai
         m_pAP = nullptr;
 
         m_gpsToutSec = 100;
-        m_gpsHaccMax = 1000; //1m uncertainty
+        m_gpsHaccMax = 1000; // 1m uncertainty
         m_tGPSmeasureStart = 0;
 
         m_bAutoArm = false;
@@ -35,10 +35,10 @@ namespace kai
         return OK_OK;
     }
 
-	int _AP_droneBox::link(void)
-	{
-		CHECK_(this->_ModuleBase::link());
-		Kiss *pK = (Kiss *)m_pKiss;
+    int _AP_droneBox::link(void)
+    {
+        CHECK_(this->_ModuleBase::link());
+        Kiss *pK = (Kiss *)m_pKiss;
 
         string n;
 
@@ -52,8 +52,8 @@ namespace kai
         m_pSC = (_StateControl *)(pK->findModule(n));
         NULL__(m_pSC, OK_ERR_NOT_FOUND);
 
-		return OK_OK;
-	}
+        return OK_OK;
+    }
 
     int _AP_droneBox::start(void)
     {
@@ -65,26 +65,24 @@ namespace kai
     {
         NULL__(m_pSC, OK_ERR_NULLPTR);
         NULL__(m_pAP, OK_ERR_NULLPTR);
-        NULL__(m_pAP->m_pMav, OK_ERR_NULLPTR);
+        NULL__(m_pAP->getMavlink(), OK_ERR_NULLPTR);
 
         return this->_ModuleBase::check();
+    }
+
+    string _AP_droneBox::getState(void)
+    {
+        return m_pSC->getCurrentStateName();
     }
 
     void _AP_droneBox::update(void)
     {
         while (m_pT->bAlive())
         {
-            m_pT->autoFPSfrom();
+            m_pT->autoFPS();
 
             updateAPdroneBox();
-
-            m_pT->autoFPSto();
         }
-    }
-
-	string _AP_droneBox::getState(void)
-    {
-        return m_pSC->getCurrentStateName();
     }
 
     void _AP_droneBox::updateAPdroneBox(void)
@@ -92,22 +90,31 @@ namespace kai
         IF_(check() != OK_OK);
 
         int apMode = m_pAP->getMode();
-        bool bApArmed = m_pAP->bApArmed();
-        float alt = m_pAP->getGlobalPos().w; //relative altitude
+        bool bApArmed = m_pAP->bArmed();
+        float alt = m_pAP->getGlobalPos().w; // relative altitude
+
+        // Manual reset & kick start
+        if (apMode == AP_COPTER_STABILIZE)
+        {
+            m_pSC->transit("RECOVER");
+        }
+        else if (apMode == AP_COPTER_ALT_HOLD)
+        {
+            m_pSC->transit("STANDBY");
+        }
 
         string state = getState();
 
-        // For manual reset
-        if (apMode == AP_COPTER_STABILIZE)
+        // Recover
+        if (state == "RECOVER")
         {
-            m_pSC->transit("STANDBY");
             return;
         }
 
         // Standby
         if (state == "STANDBY")
         {
-            IF_(apMode != AP_COPTER_GUIDED);
+            IF_(apMode != AP_COPTER_LOITER);
 
             m_pSC->transit("TAKEOFF_REQUEST");
             return;
@@ -122,13 +129,12 @@ namespace kai
         // Takeoff
         if (state == "TAKEOFF_READY")
         {
-            IF_(apMode != AP_COPTER_GUIDED);
+            //            IF_(apMode != AP_COPTER_LOITER);
 
-            if(m_pAP->getGPSfixType() != GPS_FIX_TYPE_RTK_FIXED ||
-                m_pAP->getGPShacc() > m_gpsHaccMax
-            )
+            if (m_pAP->getGPSfixType() != GPS_FIX_TYPE_RTK_FIXED ||
+                m_pAP->getGPShacc() > m_gpsHaccMax)
             {
-                if(m_tGPSmeasureStart == 0)
+                if (m_tGPSmeasureStart == 0)
                 {
                     m_tGPSmeasureStart = getApproxTbootUs();
                     return;
@@ -137,18 +143,21 @@ namespace kai
                 IF_(getApproxTbootUs() - m_tGPSmeasureStart < m_gpsToutSec * SEC_2_USEC);
 
                 // GPS fix time out, abandon take-off
-                m_pSC->transit("LANDED");
+                m_pSC->transit("RECOVER");
                 return;
             }
-
             m_tGPSmeasureStart = 0;
 
-            if (m_bAutoArm)
-                m_pAP->setArm(true);
+            if (apMode == AP_COPTER_LOITER)
+            {
+                if (m_bAutoArm)
+                    m_pAP->setArm(true);
+            }
 
             IF_(!bApArmed);
 
-            m_pAP->m_pMav->clNavTakeoff(m_altTakeoff + 1.0);
+            //            m_pAP->getMavlink()->clNavTakeoff(m_altTakeoff + 1.0);
+            m_pAP->setMode(AP_COPTER_AUTO);
 
             IF_(alt < m_altTakeoff);
 
@@ -160,10 +169,10 @@ namespace kai
         {
             IF_(m_boxState != "AIRBORNE"); // waiting box to close
 
-            if (apMode == AP_COPTER_GUIDED)
-                m_pAP->setMode(AP_COPTER_AUTO);
+//            if (apMode == AP_COPTER_GUIDED)
+//                m_pAP->setMode(AP_COPTER_AUTO);
 
-            IF_(apMode != AP_COPTER_AUTO);
+            IF_(apMode != AP_COPTER_AUTO || apMode != AP_COPTER_RTL);
 
             IF_(alt > m_altLand);
 
@@ -186,7 +195,11 @@ namespace kai
         // vision navigated descend
         if (state == "LANDING")
         {
-            // IF_(!m_pAPland->bComplete());
+            if (apMode == AP_COPTER_GUIDED)
+            {
+                m_pAP->setMode(AP_COPTER_LAND);
+            }
+
             IF_(bApArmed);
 
             m_pSC->transit("TOUCHDOWN");
@@ -195,7 +208,7 @@ namespace kai
 
         if (state == "TOUCHDOWN")
         {
-            //check if touched down
+            // check if touched down
             IF_(bApArmed);
 
             m_pSC->transit("LANDED");
@@ -205,6 +218,8 @@ namespace kai
         if (state == "LANDED")
         {
             IF_(m_boxState != "LANDED"); // waiting box to close
+
+            sleep(10);
 
             m_pSC->transit("STANDBY");
             return;
@@ -229,7 +244,7 @@ namespace kai
             m_pSC->transit("TAKEOFF_READY");
     }
 
-	void _AP_droneBox::setBoxState(const string& s)
+    void _AP_droneBox::setBoxState(const string &s)
     {
         m_boxState = s;
     }

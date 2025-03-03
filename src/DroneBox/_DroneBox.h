@@ -62,6 +62,7 @@ namespace kai
         _Modbus *m_pMB;
         int m_iSlave;
         DRONEBOX_LAST_CMD m_lastCMD;
+        int m_nSendCmd;
 
         int m_ID;
         vDouble2 m_vPos;

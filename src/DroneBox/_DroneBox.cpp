@@ -9,6 +9,7 @@ namespace kai
         m_pMB = nullptr;
         m_iSlave = 1;
         m_lastCMD = dbx_unknown;
+        m_nSendCmd = 5;
 
         m_ID = -1;
         m_vPos.clear();
@@ -26,14 +27,15 @@ namespace kai
         pK->v("ID", &m_ID);
         pK->v("vPos", &m_vPos);
         pK->v("iSlave", &m_iSlave);
+        pK->v("nSendCmd", &m_nSendCmd);
 
         return OK_OK;
     }
 
-	int _DroneBox::link(void)
-	{
-		CHECK_(this->_ModuleBase::link());
-		Kiss *pK = (Kiss *)m_pKiss;
+    int _DroneBox::link(void)
+    {
+        CHECK_(this->_ModuleBase::link());
+        Kiss *pK = (Kiss *)m_pKiss;
 
         string n;
         n = "";
@@ -46,8 +48,8 @@ namespace kai
         m_pMB = (_Modbus *)(pK->findModule(n));
         NULL__(m_pMB, OK_ERR_NOT_FOUND);
 
-		return OK_OK;
-	}
+        return OK_OK;
+    }
 
     int _DroneBox::start(void)
     {
@@ -67,11 +69,9 @@ namespace kai
     {
         while (m_pT->bAlive())
         {
-            m_pT->autoFPSfrom();
+            m_pT->autoFPS();
 
             updateDroneBox();
-
-            m_pT->autoFPSto();
         }
     }
 
@@ -81,13 +81,19 @@ namespace kai
 
         string state = getState();
 
+        if (state == "RECOVER")
+        {
+            IF_(!boxRecover());
+
+            m_pSC->transit("STANDBY");
+        }
+
         if (state == "STANDBY")
         {
-//            boxRecover();
             return;
         }
 
-        //Takeoff procedure
+        // Takeoff procedure
         if (state == "TAKEOFF_REQUEST")
         {
             IF_(!boxTakeoffPrepare());
@@ -109,7 +115,7 @@ namespace kai
             return;
         }
 
-        //Landing procedure
+        // Landing procedure
         if (state == "LANDING_REQUEST")
         {
             IF_(!boxLandingPrepare());
@@ -139,12 +145,12 @@ namespace kai
         }
     }
 
-	string _DroneBox::getState(void)
+    string _DroneBox::getState(void)
     {
         return m_pSC->getCurrentStateName();
     }
 
-	void _DroneBox::setState(const string& s)
+    void _DroneBox::setState(const string &s)
     {
         return m_pSC->transit(s);
     }
@@ -173,10 +179,15 @@ namespace kai
         IF__(m_lastCMD == dbx_takeoffPrepare, true);
         IF__(m_lastCMD == dbx_bTakeoffReady, true);
 
-        //01 06 00 03 00 01 B8 0A
-        int r = m_pMB->writeRegister(m_iSlave, 3, 1);
-        LOG_I("boxTakeoffPrepare: " + i2str(r));
-        IF_F(r <= 0);
+        int iSent = 0;
+        while (iSent < m_nSendCmd)
+        {
+            // 01 06 00 03 00 01 B8 0A
+            int r = m_pMB->writeRegister(m_iSlave, 3, 1);
+            iSent += (r > 0);
+            LOG_I("boxTakeoffPrepare: " + i2str(r));
+            sleep(1);
+        }
 
         m_lastCMD = dbx_takeoffPrepare;
         return true;
@@ -186,11 +197,11 @@ namespace kai
     {
         IF_F(check() != OK_OK);
 
-        //01 03 00 04 00 01 C5 CB
+        // 01 03 00 04 00 01 C5 CB
         uint16_t b = 0;
         int r = m_pMB->readRegisters(m_iSlave, 4, 1, &b);
-        LOG_I("bBoxTakeoffReady: " + i2str(r) + ", " + i2str(b));
         IF_F(r != 1);
+        LOG_I("bBoxTakeoffReady: " + i2str(r) + ", " + i2str(b));
 
         m_lastCMD = dbx_bTakeoffReady;
         return (b == 1) ? true : false;
@@ -201,10 +212,15 @@ namespace kai
         IF_F(check() != OK_OK);
         IF__(m_lastCMD == dbx_takeoffComplete, true);
 
-        //01 06 00 05 00 01 58 0B
-        int r = m_pMB->writeRegister(m_iSlave, 5, 1);
-        LOG_I("boxTakeoffComplete: " + i2str(r));
-        IF_F(r <= 0);
+        int iSent = 0;
+        while (iSent < m_nSendCmd)
+        {
+            // 01 06 00 05 00 01 58 0B
+            int r = m_pMB->writeRegister(m_iSlave, 5, 1);
+            iSent += (r > 0);
+            LOG_I("boxTakeoffComplete: " + i2str(r));
+            sleep(1);
+        }
 
         m_lastCMD = dbx_takeoffComplete;
         return true;
@@ -216,10 +232,15 @@ namespace kai
         IF__(m_lastCMD == dbx_landingPrepare, true);
         IF__(m_lastCMD == dbx_bLandingReady, true);
 
-        //01 06 00 00 00 01 48 0A
-        int r = m_pMB->writeRegister(m_iSlave, 0, 1);
-        LOG_I("boxLandingPrepare: " + i2str(r));
-        IF_F(r <= 0);
+        int iSent = 0;
+        while (iSent < m_nSendCmd)
+        {
+            // 01 06 00 00 00 01 48 0A
+            int r = m_pMB->writeRegister(m_iSlave, 0, 1);
+            iSent += (r > 0);
+            LOG_I("boxLandingPrepare: " + i2str(r));
+            sleep(1);
+        }
 
         m_lastCMD = dbx_landingPrepare;
         return true;
@@ -229,7 +250,7 @@ namespace kai
     {
         IF_F(check() != OK_OK);
 
-        //01 03 00 01 00 01 D5 CA
+        // 01 03 00 01 00 01 D5 CA
         uint16_t b = 0;
         int r = m_pMB->readRegisters(m_iSlave, 1, 1, &b);
         LOG_I("bBoxLandingReady: " + i2str(r) + ", " + i2str(b));
@@ -244,10 +265,15 @@ namespace kai
         IF_F(check() != OK_OK);
         IF_F(m_lastCMD == dbx_landingComplete);
 
-        //01 06 00 02 00 01 E9 CA
-        int r = m_pMB->writeRegister(m_iSlave, 2, 1);
-        LOG_I("boxLandingComplete: " + i2str(r));
-        IF_F(r <= 0);
+        int iSent = 0;
+        while (iSent < m_nSendCmd)
+        {
+            // 01 06 00 02 00 01 E9 CA
+            int r = m_pMB->writeRegister(m_iSlave, 2, 1);
+            iSent += (r > 0);
+            LOG_I("boxLandingComplete: " + i2str(r));
+            sleep(1);
+        }
 
         m_lastCMD = dbx_landingComplete;
         return true;
@@ -256,12 +282,17 @@ namespace kai
     bool _DroneBox::boxRecover(void)
     {
         IF_F(check() != OK_OK);
-        IF__(m_lastCMD == dbx_boxRecover, true);
+        //        IF__(m_lastCMD == dbx_boxRecover, true);
 
-        //01 06 00 06 00 01 A8 0B
-        int r = m_pMB->writeRegister(m_iSlave, 6, 1);
-        LOG_I("boxRecover: " + i2str(r));
-        IF_F(r <= 0);
+        int iSent = 0;
+        while (iSent < m_nSendCmd)
+        {
+            // 01 06 00 06 00 01 A8 0B
+            int r = m_pMB->writeRegister(m_iSlave, 6, 1);
+            iSent += (r > 0);
+            LOG_I("boxRecover: " + i2str(r));
+            sleep(1);
+        }
 
         m_lastCMD = dbx_boxRecover;
         return true;

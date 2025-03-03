@@ -57,11 +57,10 @@ namespace kai
     {
         while (m_pT->bAlive())
         {
-            m_pT->autoFPSfrom();
+            m_pT->autoFPS();
 
             send();
 
-            m_pT->autoFPSto();
         }
     }
 
@@ -76,6 +75,14 @@ namespace kai
         object o;
         JO(o, "id", (double)1);
         JO(o, "t", (double)m_pT->getTfrom());
+
+        if (state == "RECOVER")
+        {
+            JO(o, "cmd", "stat");
+            JO(o, "stat", "RECOVER");
+            sendJson(o);
+            return;
+        }
 
         if (state == "STANDBY")
         {

@@ -31,6 +31,12 @@
 		"name":"state",
 		{
 			"bON":1,
+			"name":"RECOVER",
+			"class":"StateBase",
+			"vModulePause":["apVideo","arUco","apLT"],
+		}
+		{
+			"bON":1,
 			"name":"STANDBY",
 			"class":"StateBase",
 			"vModulePause":["apVideo","arUco","apLT"],
@@ -124,6 +130,7 @@
 	}
 	"bLog":0,
 	"_IObase":"serialAP",
+	"devSystemID":1,
 	"mySystemID":200,
 	"iMavComm":0,
 }
@@ -148,12 +155,12 @@
 		{
 			"name":"heartbeat",
 			"id":0,
-			"tInt":1,
+			"tInt":0.2,
 		}
 		{
 			"name":"attitude",
 			"id":30,
-			"tInt":1,
+			"tInt":0.5,
 		}
 		{
 			"name":"gpsRawINT",
@@ -163,12 +170,12 @@
 		{
 			"name":"localPosition",
 			"id":32,
-			"tInt":1,
+			"tInt":0.3,
 		}
 		{
 			"name":"globalPosition",
 			"id":33,
-			"tInt":1,
+			"tInt":0.3,
 		}
 		{
 			"name":"homePosition",

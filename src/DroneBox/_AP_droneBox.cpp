@@ -106,10 +106,7 @@ namespace kai
         string state = getState();
 
         // Recover
-        if (state == "RECOVER")
-        {
-            return;
-        }
+        IF_(state == "RECOVER");
 
         // Standby
         if (state == "STANDBY")
@@ -129,8 +126,6 @@ namespace kai
         // Takeoff
         if (state == "TAKEOFF_READY")
         {
-            //            IF_(apMode != AP_COPTER_LOITER);
-
             if (m_pAP->getGPSfixType() != GPS_FIX_TYPE_RTK_FIXED ||
                 m_pAP->getGPShacc() > m_gpsHaccMax)
             {
@@ -168,9 +163,6 @@ namespace kai
         if (state == "AIRBORNE")
         {
             IF_(m_boxState != "AIRBORNE"); // waiting box to close
-
-//            if (apMode == AP_COPTER_GUIDED)
-//                m_pAP->setMode(AP_COPTER_AUTO);
 
             IF_(apMode != AP_COPTER_AUTO || apMode != AP_COPTER_RTL);
 
@@ -217,9 +209,8 @@ namespace kai
 
         if (state == "LANDED")
         {
-            IF_(m_boxState != "LANDED"); // waiting box to close
-
-            sleep(10);
+            IF_((m_boxState != "LANDED") && (m_boxState != "STANDBY"));
+            // waiting box to sync status and close
 
             m_pSC->transit("STANDBY");
             return;

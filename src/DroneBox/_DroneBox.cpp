@@ -10,6 +10,7 @@ namespace kai
         m_iSlave = 1;
         m_lastCMD = dbx_unknown;
         m_nSendCmd = 5;
+        m_tCmdSleepSec = 1;
 
         m_ID = -1;
         m_vPos.clear();
@@ -28,6 +29,7 @@ namespace kai
         pK->v("vPos", &m_vPos);
         pK->v("iSlave", &m_iSlave);
         pK->v("nSendCmd", &m_nSendCmd);
+        pK->v("tCmdSleepSec", &m_tCmdSleepSec);
 
         return OK_OK;
     }
@@ -83,9 +85,8 @@ namespace kai
 
         if (state == "RECOVER")
         {
-            IF_(!boxRecover());
-
-            m_pSC->transit("STANDBY");
+            boxRecover();
+            return;
         }
 
         if (state == "STANDBY")
@@ -186,7 +187,7 @@ namespace kai
             int r = m_pMB->writeRegister(m_iSlave, 3, 1);
             iSent += (r > 0);
             LOG_I("boxTakeoffPrepare: " + i2str(r));
-            sleep(1);
+            sleep(m_tCmdSleepSec);
         }
 
         m_lastCMD = dbx_takeoffPrepare;
@@ -219,7 +220,7 @@ namespace kai
             int r = m_pMB->writeRegister(m_iSlave, 5, 1);
             iSent += (r > 0);
             LOG_I("boxTakeoffComplete: " + i2str(r));
-            sleep(1);
+            sleep(m_tCmdSleepSec);
         }
 
         m_lastCMD = dbx_takeoffComplete;
@@ -239,7 +240,7 @@ namespace kai
             int r = m_pMB->writeRegister(m_iSlave, 0, 1);
             iSent += (r > 0);
             LOG_I("boxLandingPrepare: " + i2str(r));
-            sleep(1);
+            sleep(m_tCmdSleepSec);
         }
 
         m_lastCMD = dbx_landingPrepare;
@@ -272,7 +273,7 @@ namespace kai
             int r = m_pMB->writeRegister(m_iSlave, 2, 1);
             iSent += (r > 0);
             LOG_I("boxLandingComplete: " + i2str(r));
-            sleep(1);
+            sleep(m_tCmdSleepSec);
         }
 
         m_lastCMD = dbx_landingComplete;
@@ -282,7 +283,7 @@ namespace kai
     bool _DroneBox::boxRecover(void)
     {
         IF_F(check() != OK_OK);
-        //        IF__(m_lastCMD == dbx_boxRecover, true);
+        IF__(m_lastCMD == dbx_boxRecover, true);
 
         int iSent = 0;
         while (iSent < m_nSendCmd)
@@ -291,7 +292,7 @@ namespace kai
             int r = m_pMB->writeRegister(m_iSlave, 6, 1);
             iSent += (r > 0);
             LOG_I("boxRecover: " + i2str(r));
-            sleep(1);
+            sleep(m_tCmdSleepSec);
         }
 
         m_lastCMD = dbx_boxRecover;

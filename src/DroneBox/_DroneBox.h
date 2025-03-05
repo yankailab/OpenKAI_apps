@@ -57,12 +57,13 @@ namespace kai
             return NULL;
         }
 
-    public:
+    protected:
 		_StateControl* m_pSC;
         _Modbus *m_pMB;
         int m_iSlave;
         DRONEBOX_LAST_CMD m_lastCMD;
         int m_nSendCmd;
+        int m_tCmdSleepSec;
 
         int m_ID;
         vDouble2 m_vPos;

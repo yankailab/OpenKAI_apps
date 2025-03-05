@@ -107,6 +107,8 @@
 	"iSlave":1,
 	"ID":1,
 	"vPos":[0,0],
+	"nSendCmd":5,
+	"tCmdSleepSec":1,
 }
 
 {
